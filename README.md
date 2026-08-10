@@ -14,6 +14,52 @@ About the project name: This project was originally created as a personal intere
 
 This project uses free AI computing power as much as possible for generation.  
 
+### What's different from the original todo.txt format?
+
+HajimiTodotxt is compatible with the core todo.txt spec (`(A)` priority, creation date, `x` completion marker, `+project`, `@context`), but adds extensive extensions on top of it. The main differences are:
+
+**Note: some features may not be implemented in other todo.txt tools.**
+
+**1. Extended fields (metadata not in the original format)**
+
+| Field | Description |
+|-------|-------------|
+| `t:YYYY-MM-DD` | Threshold (hidden) date: tasks are hidden by default until this date, shown with a dashed border and reduced opacity |
+| `rec:...` | Recurrence rule: automatically generates the next task when a task is completed |
+| `desc:"..."` | Multi-line detailed description with `\"`, `\\`, `\n` escaping (the original format is single-line only) |
+| `id:...` | ID field (from older versions, only written when `show_id=true`, planned for future deprecation) |
+
+Note: the `desc` field **may not be supported by other todo.txt tools**. It trades the clean, readable todo.txt design for usability, letting you record simple task hints (e.g. a relevant URL) or implementation steps directly on the task.
+
+**2. Hierarchical projects**
+- The original todo.txt only has flat `+Project`; HajimiTodotxt supports `+Project.SubProject.SubSubProject` at any depth, following the multi-level `+project.subproject` idea from [TaskWarrior](https://taskwarrior.org/)
+- Project filters support wildcards: `+Project.*` (single level), `+**.SubProject` (any depth)
+- Provides a tree view, a project overview, and click-to-filter on project segments
+
+**3. Recurring tasks**
+- The original todo.txt spec has no recurrence support at all; the common extension rule uses the `rec:` tag for this, and HajimiTodotxt is no exception:
+  - `+1d` / `+1m` / `+1y`: repeat relative to today
+  - `1d` (no prefix): repeat relative to the original due date
+  - A bare number like `rec:5` is automatically treated as `rec:+5d`
+  - `++1d` / `++1m` / `++1y`: **(may not be implemented in other todo.txt tools)** advance to the next occurrence greater than today (stepping from the original due date), implementing the `++` syntax from [org-mode](https://orgmode.org/)
+- Completing a task with `rec:` automatically creates the next occurrence; if `t:` is also set, its relative distance to `due:` is preserved
+- The `---REPEAT-ABOVE---` / `---REPEAT-COPY---` markers inside the description control which content is copied to the next recurring task with a `rec:` tag
+
+**4. Today-task marker**
+Similar to the "My Day" feature of [MS To Do](https://en.wikipedia.org/wiki/Microsoft_To_Do) and [Super Productivity](https://github.com/super-productivity/super-productivity)
+- A special `@☀️.YYYYMMDD` context tag marks a task for today and is automatically hidden from display
+- Visual indicators: ☀️ for today, 😱 for overdue, 🌙 for future
+
+**5. Search / filter syntax**
+- Date comparisons: `<today`, `<=tomorrow`, `>2026-08-10`, to quickly filter tasks before or after a given date
+- Priority expressions: `pri=A`, `pri<C`, `pri=A-C` (range), `pri=A,B` (list), `pri=!` (no priority)
+- Project wildcard filters and click-to-filter on context tags
+
+**6. Other differences**
+- Tasks are addressed by line number (array index), not by ID
+- `todo.rc` config supports complex JSON structures (`sort_keys`, `saved_filters`, `opacity`, etc.)
+- Server layer: random token authentication, atomic writes (temp file + rename), localhost-only CORS, CSRF protection
+
 **Key Features:**
 - Hierarchical project system (`+Project.SubProject`)
 - Context tags (`@context`) for task categorization
