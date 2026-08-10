@@ -72,7 +72,8 @@ HajimiTodotxt 兼容 todo.txt 核心规范（`(A)` 优先级、创建日期、`x
 以 `\n` 换行，若输入中带有 `\n` 者将自动叠加 `\` 进行字符逃逸 |
 | `id:...` | ID 字段（旧版本功能，仅在 `show_id=true` 时输出，预计未来弃用） |
 
-注：desc 字段**可能不在其他 `todo.txt` 类软件中**
+注：desc 字段**可能不在其他 `todo.txt` 类软件中**  
+
 **2. 层级式项目**
 - 原 todo.txt 只有扁平的 `+项目`，HajimiTodotxt 支持 `+项目.子项目.孙项目` 任意层级，借鉴 [TaskWarrior](https://taskwarrior.org/) 的多层级 `+project.subproject` 思路
 - 项目过滤支持通配符：`+项目.*`（单一层级）、`+**.子项目`（任意层数）

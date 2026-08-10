@@ -71,7 +71,8 @@ HajimiTodotxt is compatible with the core todo.txt spec (`(A)` priority, creatio
 | `desc:"..."` | Multi-line detailed description: fill `"..."` with a multi-line description to record task hints (e.g. a relevant URL) or implementation steps directly on the task. Using `\n` for line breaks; input containing `\n` will automatically get `\` prepended for character escaping |
 | `id:...` | ID field (from older versions, only written when `show_id=true`, planned for future deprecation) |
 
-Note: the `desc` field **may not be supported by other todo.txt tools**. 
+Note: the `desc` field **may not be supported by other todo.txt tools**.   
+
 
 **2. Hierarchical projects**
 - The original todo.txt only has flat `+Project`; HajimiTodotxt supports `+Project.SubProject.SubSubProject` at any depth, following the multi-level `+project.subproject` idea from [TaskWarrior](https://taskwarrior.org/)
