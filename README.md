@@ -8,11 +8,53 @@
 
 ### Overview
 
-HajimiTodotxt is a lightweight, local-first task management tool built as a single-page web application. It follows the todo.txt format with extensions, providing a clean interface for managing your tasks, projects, and deadlines.  
+HajimiTodotxt is a lightweight, local-first task management tool built as a single-page web application. It follows [the todo.txt format](https://github.com/todotxt/todo.txt) with extensions, providing a clean interface for managing your tasks, projects, and deadlines.  
 
 About the project name: This project was originally created as a personal interest project to test Gemini 3.1 Pro performance, hence the name. However, the current banner image was not generated using Nano Banana.  
 
 This project uses free AI computing power as much as possible for generation.  
+
+### First, what is todo.txt?
+
+[todo.txt](https://github.com/todotxt/todo.txt) is a **plain-text task management format** started by Gina Trapani — and the inspiration for this project. Its first and most important rule is simple:
+
+> **A single line in your todo.txt text file represents a single task.**
+
+There are no databases, no vendor-specific software, and no importing/exporting — tasks live in a plain text file called `todo.txt` that any text editor can read and edit directly. Because plain text isn't tied to any operating system or software, it is **searchable, portable, lightweight, and easy to manipulate**; even if some cloud service goes down, your task list stays intact.
+
+Using special notation, todo.txt lets you slice your list along three key axes:
+
+- **Priority**: `(A)`–`(Z)`, with `(A)` being most important, so you can see at a glance what to do next
+- **Project**: `+Project`, e.g. `+GarageSale`, to list all tasks belonging to a project
+- **Context**: `@context`, e.g. `@home`, `@office`, `@phone`, inspired by David Allen's *Getting Things Done*, categorizing tasks by place and situation
+
+**Format rules:**
+
+| Element | Format | Description |
+|---------|--------|-------------|
+| Priority | `(A)`–`(Z)` | If present, it **always** appears first |
+| Creation date | `YYYY-MM-DD` | Optional, directly after the priority |
+| Completion marker | `x` | Completed tasks start with a **lowercase** `x`, followed by the completion date |
+| Project tag | `+Project` | Zero or more, appearing after the priority/date |
+| Context tag | `@context` | Zero or more |
+| Additional fields | `key:value` | For extensions, e.g. `due:2026-04-10` for a due date |
+
+**Complete example:**
+
+```
+x 2011-03-02 2011-03-01 Review Tim's pull request +TodoTxtTouch @github
+```
+
+This task was created on 2011-03-01 and completed on 2011-03-02, belonging to the `+TodoTxtTouch` project and the `@github` context.
+
+Because todo.txt is plain text, it is especially well suited to:
+
+- **Portability**: readable and writable on any system with any editor; great for Git version control
+- **Sync**: easy cross-device sync with tools like Syncthing and Rclone
+- **Longevity**: plain text never goes out of date, with no vendor lock-in
+- **Ecosystem**: dozens of compatible CLI, desktop, and mobile apps to choose from
+
+HajimiTodotxt keeps that elegant "plain text, one task per line" spirit while adding extensions like hierarchical projects and recurring tasks — which is what the next section is about.
 
 ### What's different from the original todo.txt format?
 
@@ -26,10 +68,10 @@ HajimiTodotxt is compatible with the core todo.txt spec (`(A)` priority, creatio
 |-------|-------------|
 | `t:YYYY-MM-DD` | Threshold (hidden) date: tasks are hidden by default until this date, shown with a dashed border and reduced opacity |
 | `rec:...` | Recurrence rule: automatically generates the next task when a task is completed |
-| `desc:"..."` | Multi-line detailed description: fill `"..."` with a multi-line description to record task hints, using `\n` for line breaks; input containing `\n` will automatically get `\` prepended for character escaping |
+| `desc:"..."` | Multi-line detailed description: fill `"..."` with a multi-line description to record task hints (e.g. a relevant URL) or implementation steps directly on the task. Using `\n` for line breaks; input containing `\n` will automatically get `\` prepended for character escaping |
 | `id:...` | ID field (from older versions, only written when `show_id=true`, planned for future deprecation) |
 
-Note: the `desc` field **may not be supported by other todo.txt tools**. It trades the clean, readable todo.txt design for usability, letting you record simple task hints (e.g. a relevant URL) or implementation steps directly on the task.
+Note: the `desc` field **may not be supported by other todo.txt tools**. 
 
 **2. Hierarchical projects**
 - The original todo.txt only has flat `+Project`; HajimiTodotxt supports `+Project.SubProject.SubSubProject` at any depth, following the multi-level `+project.subproject` idea from [TaskWarrior](https://taskwarrior.org/)
