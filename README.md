@@ -26,7 +26,7 @@ HajimiTodotxt is compatible with the core todo.txt spec (`(A)` priority, creatio
 |-------|-------------|
 | `t:YYYY-MM-DD` | Threshold (hidden) date: tasks are hidden by default until this date, shown with a dashed border and reduced opacity |
 | `rec:...` | Recurrence rule: automatically generates the next task when a task is completed |
-| `desc:"..."` | Multi-line detailed description with `\"`, `\\`, `\n` escaping (the original format is single-line only) |
+| `desc:"..."` | Multi-line detailed description: fill `"..."` with a multi-line description to record task hints, using `\n` for line breaks; input containing `\n` will automatically get `\` prepended for character escaping |
 | `id:...` | ID field (from older versions, only written when `show_id=true`, planned for future deprecation) |
 
 Note: the `desc` field **may not be supported by other todo.txt tools**. It trades the clean, readable todo.txt design for usability, letting you record simple task hints (e.g. a relevant URL) or implementation steps directly on the task.
