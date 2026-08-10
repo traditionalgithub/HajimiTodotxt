@@ -1,0 +1,14 @@
+theme=seafoam
+confirm_delete=true
+show_delete_button=false
+sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}, {"key": "created", "asc": true}]
+done_sort_keys=[{"key": "doneDate", "asc": false}, {"key": "", "asc": false}]
+saved_filters=[{"name": "待辦工作", "q": "-work"}, {"name": "今日緊急", "q": "<tomorrow"}]
+opacity=0.7
+done_opacity=0.9
+main_width=900
+default_priority=(C)
+expand_projects=false
+show_id=false
+complete_children=True
+click_action=filter

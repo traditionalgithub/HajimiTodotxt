@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HajimiTodotxt</title>
+    <style>
+        /* === Theme Variables === */
+        :root {
+            --bg-color: #f5f5dc; --text-color: #3e2723; --accent: #8d6e63;
+            --card-bg: #fffdf0; --border: #d7ccc8; --tag-bg: #efebe9; --tag-text: #5d4037;
+            --danger: #d32f2f; --project-color: #a1887f; --context-color: #90a4ae; --success: #388e3c;
+            --font-main: "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", system-ui, -apple-system, sans-serif;
+            --font-mono: "Noto Sans Mono CJK SC", "Noto Sans Mono CJK TC", "Source Han Mono", "WenQuanYi Micro Hei Mono", "Microsoft JhengHei", Consolas, Monaco, "Courier New", monospace;
+            --checkbox-size: 18px; --modal-bg: rgba(0,0,0,0.5); --opacity: 1; --main-width: 800px;
+        }
+        [data-theme="dark"] {
+            --bg-color: #1e1e1e; --text-color: #e0e0e0; --accent: #d4a5a5;
+            --card-bg: #2d2d2d; --border: #444; --tag-bg: #444; --tag-text: #ccc;
+            --danger: #ff6b6b; --project-color: #ffb7b2; --context-color: #a8e6cf; --success: #69f0ae;
+        }
+        [data-theme="girly"] {
+            --bg-color: #fff0f5; --text-color: #5d4037; --accent: #ff69b4;
+            --card-bg: #ffffff; --border: #ffc0cb; --tag-bg: #ffe4e1; --tag-text: #d81b60;
+            --danger: #ff4081; --project-color: #ff80ab; --context-color: #80deea; --success: #00c853;
+        }
+        [data-theme="solarized-light"] {
+            --bg-color: #fdf6e3; --text-color: #657b83; --accent: #b58900;
+            --card-bg: #eee8d5; --border: #93a1a1; --tag-bg: #eee8d5; --tag-text: #586e75;
+            --danger: #dc322f; --project-color: #268bd2; --context-color: #859900; --success: #859900;
+        }
+        [data-theme="nord-light"] {
+            --bg-color: #eceff4; --text-color: #2e3440; --accent: #88c0d0;
+            --card-bg: #e5e9f0; --border: #d8dee9; --tag-bg: #d8dee9; --tag-text: #4c566a;
+            --danger: #bf616a; --project-color: #81a1c1; --context-color: #a3be8c; --success: #a3be8c;
+        }
+        [data-theme="solarized-dark"] {
+            --bg-color: #002b36; --text-color: #839496; --accent: #b58900;
+            --card-bg: #073642; --border: #586e75; --tag-bg: #073642; --tag-text: #93a1a1;
+            --danger: #dc322f; --project-color: #268bd2; --context-color: #859900; --success: #859900;
+        }
+        [data-theme="nord-dark"] {
+            --bg-color: #2e3440; --text-color: #d8dee9; --accent: #88c0d0;
+            --card-bg: #3b4252; --border: #4c566a; --tag-bg: #434c5e; --tag-text: #e5e9f0;
+            --danger: #bf616a; --project-color: #81a1c1; --context-color: #a3be8c; --success: #a3be8c;
+        }
+        [data-theme="sakura"] {
+            --bg-color: #fef6f9; --text-color: #5a3e4b; --accent: #e8a0b4;
+            --card-bg: #fff9fb; --border: #f0d4dc; --tag-bg: #fce8ef; --tag-text: #8c5c6e;
+            --danger: #e57373; --project-color: #d4a0b4; --context-color: #a8d4c8; --success: #66bb6a;
+        }
+        [data-theme="mint"] {
+            --bg-color: #f0f7f4; --text-color: #2d4a3e; --accent: #7ab8a8;
+            --card-bg: #fafff8; --border: #c8e0d8; --tag-bg: #e0f0ea; --tag-text: #4a7a6a;
+            --danger: #e57373; --project-color: #7ab8a8; --context-color: #a8c8d4; --success: #66bb6a;
+        }
+        [data-theme="lavender"] {
+            --bg-color: #f6f3fb; --text-color: #3e3859; --accent: #9b8ec4;
+            --card-bg: #fcfaff; --border: #d8d0ec; --tag-bg: #ede8f5; --tag-text: #6a6296;
+            --danger: #e57373; --project-color: #b09ed4; --context-color: #a8d4c8; --success: #66bb6a;
+        }
+        [data-theme="peach"] {
+            --bg-color: #fef8f3; --text-color: #4a3e35; --accent: #e8b88a;
+            --card-bg: #fffcf8; --border: #f0e0d0; --tag-bg: #f8efe8; --tag-text: #8a705a;
+            --danger: #e57373; --project-color: #d4a880; --context-color: #a8c8d4; --success: #66bb6a;
+        }
+        [data-theme="cream"] {
+            --bg-color: #fefcf5; --text-color: #4a4238; --accent: #c9a96e;
+            --card-bg: #fffffa; --border: #ece0cc; --tag-bg: #f5efe4; --tag-text: #7a6a58;
+            --danger: #e57373; --project-color: #c9a96e; --context-color: #8ab8c8; --success: #66bb6a;
+        }
+        [data-theme="sky"] {
+            --bg-color: #f0f6fc; --text-color: #3a4a5a; --accent: #7aadce;
+            --card-bg: #f8faff; --border: #d4e2ec; --tag-bg: #e6eef5; --tag-text: #5a6a7a;
+            --danger: #e57373; --project-color: #7aadce; --context-color: #8ac8b0; --success: #66bb6a;
+        }
+        [data-theme="matcha"] {
+            --bg-color: #f2f5ec; --text-color: #3a4530; --accent: #8fa67a;
+            --card-bg: #f9fbf5; --border: #d6dfc8; --tag-bg: #e8efe0; --tag-text: #5a7050;
+            --danger: #e57373; --project-color: #8fa67a; --context-color: #8ac0b8; --success: #66bb6a;
+        }
+        [data-theme="linen"] {
+            --bg-color: #f6f4ef; --text-color: #4a4540; --accent: #a09888;
+            --card-bg: #fcfaf6; --border: #e2ddd4; --tag-bg: #eeeae3; --tag-text: #7a7268;
+            --danger: #e57373; --project-color: #a09888; --context-color: #8ab8c8; --success: #66bb6a;
+        }
+        [data-theme="honey"] {
+            --bg-color: #fdf8ed; --text-color: #4a4030; --accent: #d4a843;
+            --card-bg: #fffcf5; --border: #ece0c8; --tag-bg: #f5efe0; --tag-text: #7a6a48;
+            --danger: #e57373; --project-color: #d4a843; --context-color: #8ab8c8; --success: #66bb6a;
+        }
+        [data-theme="seafoam"] {
+            --bg-color: #eef6f5; --text-color: #2d4a47; --accent: #6ab0a8;
+            --card-bg: #f5faf9; --border: #cce0dc; --tag-bg: #e0eee9; --tag-text: #4a7a72;
+            --danger: #e57373; --project-color: #6ab0a8; --context-color: #8ab8c8; --success: #66bb6a;
+        }
+        [data-theme="cloud"] {
+            --bg-color: #f4f4f7; --text-color: #3e3e48; --accent: #8a8a9e;
+            --card-bg: #fafafc; --border: #e0e0e6; --tag-bg: #ececf0; --tag-text: #6a6a78;
+            --danger: #e57373; --project-color: #8a8a9e; --context-color: #8ac0b8; --success: #66bb6a;
+        }
+        [data-theme="coral"] {
+            --bg-color: #fef5f2; --text-color: #4a3a38; --accent: #d48a7a;
+            --card-bg: #fffaf8; --border: #e8d4cc; --tag-bg: #f5eae5; --tag-text: #7a6058;
+            --danger: #e57373; --project-color: #d48a7a; --context-color: #8ac8b8; --success: #66bb6a;
+        }
+        [data-theme="dim"] {
+            --bg-color: #25252a; --text-color: #c8c8d0; --accent: #8a8a9e;
+            --card-bg: #2f2f35; --border: #3f3f48; --tag-bg: #383840; --tag-text: #a8a8b4;
+            --danger: #e57373; --project-color: #9e9eb4; --context-color: #80b8a8; --success: #69f0ae;
+        }
+        [data-theme="forest"] {
+            --bg-color: #1a2e2a; --text-color: #b8d0c8; --accent: #6ea898;
+            --card-bg: #243834; --border: #2e4842; --tag-bg: #2a403a; --tag-text: #90b0a8;
+            --danger: #ef8a8a; --project-color: #7ab8a8; --context-color: #8ab8c8; --success: #69f0ae;
+        }
+        [data-theme="twilight"] {
+            --bg-color: #28243a; --text-color: #c4c0d8; --accent: #9286ba;
+            --card-bg: #322e48; --border: #3e3a56; --tag-bg: #383454; --tag-text: #a8a0c4;
+            --danger: #e57373; --project-color: #9e8ec8; --context-color: #80b8a8; --success: #69f0ae;
+        }
+        [data-theme="cocoa"] {
+            --bg-color: #2a2420; --text-color: #c8beb8; --accent: #a0887a;
+            --card-bg: #352e2a; --border: #423a34; --tag-bg: #3c3430; --tag-text: #a8a09a;
+            --danger: #ef8a8a; --project-color: #b09888; --context-color: #80a8b8; --success: #69f0ae;
+        }
+
+        /* === Base Layout === */
+        * { box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg-color); color: var(--text-color); margin: 0 auto; padding: 20px 20px 60px; line-height: 1.5; max-width: var(--main-width); transition: background 0.3s; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 15px; position: sticky; top: 0; background: var(--bg-color); z-index: 100; padding-top: 10px; }
+        h2 { margin: 0; font-size: 1.4em; }
+        .header-tools { display: flex; gap: 4px; }
+
+        /* === Buttons === */
+        button { cursor: pointer; padding: 6px 12px; border: none; border-radius: 4px; background: var(--accent); color: var(--bg-color); font-weight: bold; transition: 0.2s; font-family: inherit; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button.icon-btn { background: transparent; color: var(--text-color); padding: 4px; font-size: 1.2em; border: 1px solid transparent; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; }
+        button.icon-btn:hover { background: rgba(0,0,0,0.05); border-color: var(--border); }
+        button.danger { color: var(--danger); }
+        button.small-btn { padding: 2px 6px; font-size: 0.8em; margin-left: 5px; background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border); }
+
+        /* === Filter Bar === */
+        .filter-bar { display: flex; gap: 5px; margin-bottom: 15px; align-items: center; background: var(--card-bg); padding: 8px 12px; border-radius: 25px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 60px; z-index: 90; }
+        .filter-input { flex-grow: 1; background: transparent; border: none; color: var(--text-color); outline: none; font-size: 1em; min-width: 50px; }
+        .filter-divider { width: 1px; height: 20px; background: var(--border); margin: 0 5px; }
+
+        /* === Task List === */
+        .task-item { background: var(--card-bg); border: 1px solid var(--border); padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .task-item.threshold-hidden { opacity: var(--hidden-opacity, 0.5); border-style: dashed; }
+        .task-item.done-item { opacity: var(--done-opacity, 0.6); filter: grayscale(0.8); }
+        .task-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+        .checkbox-wrapper { padding-top: 3px; }
+        input[type="checkbox"] { width: var(--checkbox-size); height: var(--checkbox-size); cursor: pointer; accent-color: var(--accent); }
+        .task-content { flex-grow: 1; min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .task-title-area { flex-grow: 1; min-width: 0; }
+        .task-subject { font-weight: bold; line-height: 1.4; word-break: break-word; overflow-wrap: anywhere; cursor: pointer; }
+        .task-actions { display: flex; gap: 5px; flex-shrink: 0; }
+        .task-desc-container { font-size: 0.9em; color: var(--text-color); opacity: 0.85; border-left: 2px solid var(--border); padding-left: 8px; margin-top: 0; font-family: var(--font-mono); }
+        .task-desc-content { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; max-height: 3.6em; transition: max-height 0.3s; }
+        .task-desc-content.expanded { max-height: none; overflow: visible; }
+        .desc-toggle { font-size: 0.8em; color: var(--accent); cursor: pointer; display: none; margin-top: 2px; }
+        .hl-project { color: var(--project-color); font-weight: bold; cursor: pointer; }
+        .hl-project-segment { color: var(--project-color); font-weight: bold; cursor: pointer; }
+        .hl-project-segment:hover { text-decoration: underline; }
+        .hl-context { color: var(--context-color); font-weight: bold; cursor: pointer; }
+        .tag { font-size: 0.75em; padding: 1px 6px; border-radius: 4px; margin-right: 5px; background: var(--tag-bg); color: var(--tag-text); border: 1px solid var(--border); display: inline-block; vertical-align: middle; }
+        .done-section { margin-top: 40px; opacity: 0.8; }
+        .done-section h3 { border-bottom: 1px solid var(--border); cursor: pointer; font-size: 1em; }
+        .done-section h3 span { font-size: 0.8em; }
+
+        /* === Modals === */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+        .modal-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 95%; max-width: calc(var(--main-width) * 0.95); max-height: 90vh; overflow-y: auto; border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 15px; }
+        .modal-box.settings-box { max-width: 400px; }
+        .modal-header { font-size: 1.3em; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+        /* === Tabs === */
+        .tabs { display: flex; gap: 5px; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
+        .tab { padding: 8px 16px; cursor: pointer; border: none; background: transparent; color: var(--text-color); font-weight: bold; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { background: rgba(0,0,0,0.05); }
+        .tab.active { border-bottom-color: var(--accent); color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s; }
+        .modal-header .tabs { border: none; margin: 0; gap: 10px; }
+        .modal-header .tab { padding: 6px 12px; font-size: 0.9em; }
+
+        /* === Forms === */
+        .form-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .form-group { flex-grow: 1; }
+        .form-group.flex-2 { flex: 2; }
+        .form-group.flex-1 { flex: 1; }
+        input, select, textarea { width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--border); color: var(--text-color); padding: 8px; border-radius: 6px; box-sizing: border-box; font-family: var(--font-mono); }
+        textarea.title-input { font-size: 1.1em; font-weight: bold; height: 60px; resize: vertical; }
+        textarea.desc-input { font-size: 1em; height: 100px; resize: vertical; }
+        textarea { scrollbar-width: thin; scrollbar-color: var(--accent) var(--border); }
+        textarea::-webkit-scrollbar { width: 16px; }
+        textarea::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; border: 2px solid var(--card-bg); }
+        textarea::-webkit-scrollbar-thumb:hover { background: var(--project-color); }
+        textarea::-webkit-scrollbar-track { background: var(--border); border-radius: 8px; }
+        label { font-size: 0.8em; }
+        label.text-gray { color: gray; }
+        .form-actions { text-align: right; margin-top: 10px; }
+        .btn-group { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+
+        /* === Settings === */
+        .settings-row { display: flex; justify-content: space-between; align-items: center; }
+        .settings-row input[type="checkbox"] { width: auto; }
+        .settings-hint { font-size: 0.8em; color: #888; line-height: 1.4; }
+        .settings-divider { width: 100%; border: 0; border-top: 1px solid var(--border); }
+
+        /* === Floating Menus === */
+        .float-menu { display: none; position: absolute; background: var(--card-bg); border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); padding: 8px; z-index: 3000; max-height: 250px; overflow-y: auto; min-width: 150px; }
+        .float-menu.show { display: block; animation: fadeIn 0.1s; }
+        .float-menu.wide { min-width: 240px; }
+        .menu-divider { height: 1px; background: var(--border); margin: 8px 0; }
+        .menu-item { display: block; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 0.9em; }
+        .menu-item:hover { background: rgba(0,0,0,0.05); }
+        .menu-header { padding: 5px; border-bottom: 1px solid var(--border); font-weight: bold; color: var(--accent); }
+        .menu-empty { padding: 10px; color: #888; font-size: 0.8em; }
+
+        /* === Back to Top === */
+        #back-top { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: var(--accent); color: var(--bg-color); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 1.5em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 900; opacity: 0.8; }
+        #back-top:hover { opacity: 1; transform: translateY(-3px); }
+
+        /* === Project View === */
+        .project-view-box { max-width: 1000px; }
+        .pv-node { margin: 1px 0; }
+        .pv-project-header { cursor: pointer; padding: 5px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px; font-weight: bold; }
+        .pv-project-header:hover { background: rgba(0,0,0,0.05); }
+        .pv-toggle { font-size: 0.75em; width: 14px; text-align: center; color: var(--accent); flex-shrink: 0; user-select: none; }
+        .pv-project-name { color: var(--project-color); }
+        .pv-count { font-size: 1em; color: #888; font-weight: normal; }
+        .pv-children { padding-left: 22px; }
+        .pv-task-group { margin: 3px 0; }
+        .pv-task-group-header { cursor: pointer; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px; font-size: 0.85em; color: var(--text-color); opacity: 0.7; }
+        .pv-task-group-header:hover { background: rgba(0,0,0,0.03); }
+        .pv-task-group-body { padding-left: 22px; }
+        .pv-task-item { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 10px; margin: 3px 0; border-radius: 5px; display: flex; align-items: flex-start; gap: 6px; }
+        .pv-task-item.done { opacity: var(--done-opacity, 0.6); filter: grayscale(0.8); }
+        .pv-task-body { flex-grow: 1; min-width: 0; }
+        .pv-task-subject { font-weight: bold; line-height: 1.4; word-break: break-word; overflow-wrap: anywhere; font-size: 0.95em; }
+        .pv-task-subject .tag { font-size: 0.75em; }
+        .pv-jump-btn { flex-shrink: 0; background: transparent; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 0.85em; padding: 2px 6px; color: var(--accent); margin-top: 2px; }
+        .pv-jump-btn:hover { background: var(--accent); color: var(--card-bg); }
+        .pv-no-project { margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--border); }
+
+        /* === Animations === */
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2 id="page-title">☕ 待辦筆記</h2>
+    <div class="header-tools">
+        <button class="icon-btn" onclick="App.openEditModal()" id="btn-add-task" title="新增任務">➕</button>
+        <button class="icon-btn" onclick="App.toggleSortMenu(event)" id="btn-sort" title="排序">🔃</button>
+        <button class="icon-btn" onclick="App.toggleTodayFilter()" id="btn-today-filter" title="過濾今日任務">☀️</button>
+        <button class="icon-btn" onclick="App.toggleSettingsModal()" id="btn-settings" title="設定">⚙️</button>
+        <button class="icon-btn" onclick="App.toggleShowHidden()" id="btn-hidden-toggle" title="顯示/隱藏未來任務">🫣</button>
+        <button class="icon-btn" onclick="App.openProjectView()" id="btn-project-view" title="專案概覽">📋</button>
+    </div>
+</header>
+
+<div class="filter-bar">
+    <span style="font-size:1.1em; opacity:0.6;">🔍</span>
+    <input type="text" id="filter-input" class="filter-input" placeholder="搜尋..." onkeyup="App.render()">
+    <button class="icon-btn" onclick="App.clearFilter()" id="btn-clear-filter" title="清空" style="font-size:0.9em; color:#888;">✕</button>
+    <div class="filter-divider"></div>
+    <button class="icon-btn" onclick="App.openContextMenu(event, 'filter-input')" id="btn-insert-context" title="插入上下文 (@context)">@</button>
+    <button class="icon-btn" onclick="App.openProjectMenu(event, 'filter-input')" id="btn-insert-project" title="插入項目 (+project)">+</button>
+    <button class="icon-btn" onclick="App.toggleSavedFilters(event)" id="btn-saved-filters" title="常用過濾器">⭐</button>
+</div>
+
+<div id="task-list"></div>
+<div class="done-section">
+    <h3 onclick="App.toggleDoneSection()">
+        <span id="done-section-title">📦 已完成</span>
+        <span id="done-section-count" style="font-size:0.8em">0項 ▼</span>
+    </h3>
+    <div id="done-list" style="display:none"></div>
+</div>
+
+<div id="back-top" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span id="edit-modal-title">新增任務</span>
+            <div class="tabs">
+                <button class="tab active" onclick="App.switchTab('properties')" id="tab-properties">任務屬性</button>
+                <button class="tab" onclick="App.switchTab('description')" id="tab-description">任務描述</button>
+            </div>
+            <button class="icon-btn" onclick="App.closeEditModal()">✕</button>
+        </div>
+
+        <div class="tab-content active" id="tab-content-properties">
+            <div class="form-row">
+                <textarea id="inp-sub" class="title-input" placeholder="任務標題 (可多行，存檔自動轉單行)"></textarea>
+            </div>
+            <div class="form-row btn-group">
+                <span class="text-gray" id="label-title-size">標題大小:</span>
+                <button class="small-btn" onclick="App.resizeTitleInput('large')" id="btn-title-large">▲</button>
+                <button class="small-btn" onclick="App.resizeTitleInput('medium')" id="btn-title-medium">↺</button>
+                <button class="small-btn" onclick="App.resizeTitleInput('small')" id="btn-title-small">▼</button>
+            </div>
+
+            <div class="form-row btn-group">
+                <div class="form-group flex-1">
+                    <label class="text-gray" id="label-priority">優先級</label>
+                    <select id="inp-pri"><option value="">-</option></select>
+                </div>
+                <div style="align-self: flex-end;">
+                    <button class="icon-btn" onclick="App.openContextMenu(event, 'inp-sub')" id="btn-insert-context-modal" style="height:38px; width:38px;" title="插入上下文 (@context)">@</button>
+                    <button class="icon-btn" onclick="App.openProjectMenu(event, 'inp-sub')" id="btn-insert-project-modal" style="height:38px; width:38px; position:relative;" title="插入項目 (+project)">+</button>
+                    <button class="icon-btn" onclick="App.toggleTodayTaskInModal()" id="btn-today-task-modal" style="height:38px; width:38px;" title="添加/取消今日任務">☀️</button>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label id="label-due">截止日期</label>
+                    <input type="date" id="inp-due">
+                </div>
+                <div class="form-group flex-1">
+                    <label id="label-threshold">隱藏至</label>
+                    <input type="date" id="inp-t">
+                </div>
+                <div class="form-group flex-1">
+                    <label id="label-recurrence">重複</label>
+                    <input type="text" id="inp-rec" placeholder="+1d (格式：+數字單位 d/m/y)">
+                </div>
+            </div>
+            <div class="form-row" id="done-date-row" style="display:none;">
+                <div class="form-group flex-1">
+                    <label id="label-done-date">完成日</label>
+                    <input type="date" id="inp-done-date">
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-content-description">
+            <div class="form-row">
+                <textarea id="inp-desc" class="desc-input" placeholder="詳細描述 (支援多行，會被保存為 desc:&quot;...&quot;)"></textarea>
+            </div>
+            <div class="form-row btn-group">
+                <button class="small-btn" onclick="App.insertDateToDesc()" id="btn-insert-time" title="插入現在時間">插入現在時間</button>
+                <button class="small-btn" onclick="App.insertRepeatSeparator()" id="btn-repeat-separator" title="插入重複分隔符">🔁 分隔符</button>
+                <button class="small-btn" onclick="App.insertRepeatSeparatorBoth()" id="btn-repeat-separator-both" title="插入複製分隔符 (內容會同時保留在舊任務和新任務)">🔁 複製</button>
+                <span class="text-gray" id="label-desc-size">描述大小:</span>
+                <button class="small-btn" onclick="App.resizeDescInput('large')" id="btn-desc-large">▲</button>
+                <button class="small-btn" onclick="App.resizeDescInput('medium')" id="btn-desc-medium">↺</button>
+                <button class="small-btn" onclick="App.resizeDescInput('small')" id="btn-desc-small">▼</button>
+                <button class="small-btn" onclick="App.renumberNumberedItems()" id="btn-renumber" title="重新編號同縮排的標號項目">🔢</button>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button onclick="App.saveTaskAndKeepOpen()" id="save-task-keep-open-btn">保存並繼續</button>
+            <button onclick="App.saveTask()" id="save-task-btn">保存任務</button>
+            <button onclick="App.deleteTaskFromEdit()" id="btn-delete-task" style="background: var(--danger); color: var(--bg-color);">刪除任務</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)App.toggleSettingsModal()">
+    <div class="modal-box settings-box">
+        <div class="modal-header">
+            <span id="settings-modal-title">⚙️ 設定</span>
+            <button class="icon-btn" onclick="App.toggleSettingsModal()" id="btn-close-settings">✕</button>
+        </div>
+        <div class="settings-row">
+            <span id="settings-theme-label">主題</span>
+            <select id="cfg-theme" onchange="App.applyTheme(this.value); App.saveConfig()">
+                <option value="neutral">中性 (Neutral)</option>
+                <option value="dark">暗黑 (Dark)</option>
+                <option value="girly">少女 (Girly)</option>
+                <option value="solarized-light">太陽亮 (Solarized Light)</option>
+                <option value="nord-light">北歐亮 (Nord Light)</option>
+                <option value="sakura">櫻花粉 (Sakura)</option>
+                <option value="mint">薄荷綠 (Mint)</option>
+                <option value="lavender">薰衣草紫 (Lavender)</option>
+                <option value="peach">蜜桃橙 (Peach)</option>
+                <option value="cream">奶油白 (Cream)</option>
+                <option value="sky">天空藍 (Sky)</option>
+                <option value="matcha">抹茶綠 (Matcha)</option>
+                <option value="linen">亞麻灰 (Linen)</option>
+                <option value="honey">蜂蜜金 (Honey)</option>
+                <option value="seafoam">海沫藍 (Seafoam)</option>
+                <option value="cloud">雲朵灰 (Cloud)</option>
+                <option value="coral">珊瑚粉 (Coral)</option>
+                <option value="solarized-dark">太陽暗 (Solarized Dark)</option>
+                <option value="nord-dark">北歐暗 (Nord Dark)</option>
+                <option value="dim">柔暗灰 (Dim)</option>
+                <option value="forest">森林夜 (Forest)</option>
+                <option value="twilight">暮光紫 (Twilight)</option>
+                <option value="cocoa">可可棕 (Cocoa)</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <span id="settings-confirm-label">刪除前確認</span>
+            <input type="checkbox" id="cfg-confirm" onchange="App.saveConfig()">
+        </div>
+        <div class="settings-row">
+            <span id="settings-show-delete-label">顯示刪除按鈕</span>
+            <input type="checkbox" id="cfg-show-delete" onchange="App.saveConfig()">
+        </div>
+        <div class="settings-row">
+            <span id="settings-show-id-label">顯示 ID 欄位</span>
+            <input type="checkbox" id="cfg-show-id" onchange="App.saveConfig()">
+        </div>
+        <div class="settings-row">
+            <span id="settings-click-action-label">點擊任務欄位</span>
+            <select id="cfg-click-action" onchange="App.saveConfig()">
+                <option value="filter" id="opt-click-filter">添加到搜索欄</option>
+                <option value="copy" id="opt-click-copy">複製到剪貼簿</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <span id="settings-default-priority-label">預設優先級</span>
+            <select id="cfg-default-priority" onchange="App.saveConfig()"></select>
+        </div>
+        <div class="settings-row">
+            <span id="settings-expand-projects-label">預設展開專案</span>
+            <input type="checkbox" id="cfg-expand-projects" onchange="App.saveConfig()">
+        </div>
+        <hr class="settings-divider">
+        <div class="settings-row">
+            <span id="settings-main-width-label">主界面寬度</span>
+            <input type="range" id="cfg-main-width" min="600" max="1500" step="100" style="width:150px;" onchange="App.applyMainWidth(this.value); App.saveConfig()">
+            <span id="main-width-value" style="font-size:0.8em; color:#888; width:60px;">800px</span>
+        </div>
+        <div class="settings-row">
+            <span id="settings-opacity-label">隱藏任務透明度</span>
+            <input type="range" id="cfg-opacity" min="0.1" max="1" step="0.1" style="width:150px;" onchange="App.applyOpacity(this.value); App.saveConfig()">
+            <span id="opacity-value" style="font-size:0.8em; color:#888; width:30px;">1.0</span>
+        </div>
+        <div class="settings-row">
+            <span id="settings-done-opacity-label">已完成任務透明度</span>
+            <input type="range" id="cfg-done-opacity" min="0.1" max="1" step="0.1" style="width:150px;" onchange="App.applyDoneOpacity(this.value); App.saveConfig()">
+            <span id="done-opacity-value" style="font-size:0.8em; color:#888; width:30px;">0.6</span>
+        </div>
+        <hr class="settings-divider">
+        <div class="settings-row">
+            <span id="settings-todo-file-label">todo.txt 修改時間</span>
+            <span id="todo-last-modified" style="font-size:0.8em; color:#888;">載入中...</span>
+        </div>
+        <div class="settings-hint">
+            <strong id="opacity-hint-label">Note:</strong><span id="opacity-hint-text">Opacity setting only affects hidden tasks (tasks with dashed borders).</span><br>
+            <strong>Sync Info:</strong><br>
+            <span id="sync-info-text">Yet to be implemented</span>
+        </div>
+    </div>
+</div>
+
+<!-- Project View Modal -->
+<div id="project-view-modal" class="modal-overlay" onclick="if(event.target===this)App.closeProjectView()">
+    <div class="modal-box project-view-box">
+        <div class="modal-header">
+                <span id="project-view-title">📋 Project Overview</span>
+            <div style="display:flex;gap:4px;">
+                <button class="icon-btn" onclick="App.toggleAllProjectViewNodes()" title="全部展開/收合">🔽</button>
+                <button class="icon-btn" onclick="App.closeProjectView()">✕</button>
+            </div>
+        </div>
+        <div id="project-view-content"></div>
+    </div>
+</div>
+
+<!-- Floating Menus -->
+<div id="tag-menu" class="float-menu"></div>
+<div id="filter-menu" class="float-menu"></div>
+<div id="sort-menu" class="float-menu wide">
+    <div class="menu-header" id="sort-menu-title">排序優先級</div>
+    <div id="sort-options-container"></div>
+    <div class="menu-divider"></div>
+    <div class="menu-header" id="done-sort-menu-title">已完成排序</div>
+    <div id="done-sort-options-container"></div>
+</div>
+
+<script>
+// === Application Namespace ===
+const App = (function() {
+    'use strict';
+
+    // === Constants ===
+    const APP_VERSION = '7.2.2.1.5.0';
+    const REPEAT_SEPARATOR = '---REPEAT-ABOVE---';
+    const REPEAT_SEPARATOR_BOTH = '---REPEAT-COPY---';
+
+    // === State ===
+    let tasks = [], doneTasks = [];
+    let config = {
+        theme: "neutral", confirm_delete: "true", show_delete_button: "true",
+        sort_keys: [{key: 'pri', asc: true}, {key: 'due', asc: true}, {key: 'created', asc: true}],
+        done_sort_keys: [{key: 'doneDate', asc: false}],
+        saved_filters: [{name:"Today Urgent", q:"<tomorrow"}],
+        opacity: "1",
+        done_opacity: "0.6",
+        main_width: 800,
+        default_priority: "(C)",
+        expand_projects: false
+    };
+    let editingIndex = null;
+    let editingIsDone = false;
+    let showHiddenTasks = false;
+    let showTodayTasks = false;
+    let currentLang = 'zh-TW';
+
+    // === DOM Cache ===
+    const DOM = {};
+
+    // === Utility Functions ===
+    const escapeHtml = (s) => s ? s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    
+    const todayStr = (date = new Date()) => {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    const addCacheBusting = (url) => {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}v=${APP_VERSION}`;
+    };
+
+    const getLang = (key, fallback = '') => {
+        const keys = key.split('.');
+        let val = window.langResources || {};
+        for (const k of keys) {
+            val = val[k];
+            if (val === undefined) return fallback;
+        }
+        return val || fallback;
+    };
+
+    // === DOM Cache Initialization ===
+    function initDOMCache() {
+        const ids = [
+            'task-list', 'done-list', 'filter-input', 'edit-modal', 'settings-modal',
+            'tag-menu', 'filter-menu', 'sort-menu', 'back-top',
+            'inp-sub', 'inp-desc', 'inp-pri', 'inp-due', 'inp-t', 'inp-rec', 'inp-done-date',
+            'cfg-theme', 'cfg-confirm', 'cfg-show-delete', 'cfg-show-id', 'cfg-click-action', 'cfg-default-priority', 'cfg-expand-projects',
+            'cfg-main-width', 'cfg-opacity', 'cfg-done-opacity', 'main-width-value', 'opacity-value', 'done-opacity-value',
+            'edit-modal-title', 'settings-modal-title',
+            'done-section-title', 'done-section-count', 'page-title', 'sort-options-container',
+            'done-sort-options-container', 'done-sort-menu-title',
+            'tab-content-properties', 'tab-content-description', 'tab-properties', 'tab-description',
+            'save-task-btn', 'save-task-keep-open-btn', 'btn-delete-task', 'sort-menu-title', 'done-date-row',
+            'project-view-modal', 'project-view-content'
+        ];
+        ids.forEach(id => DOM[id] = document.getElementById(id));
+    }
+
+    // === Language & i18n ===
+    function detectLanguage() {
+        const userLang = localStorage.getItem('userLanguage');
+        if (userLang && ['zh-TW', 'en'].includes(userLang)) return userLang;
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang.startsWith('zh')) return 'zh-TW';
+        if (browserLang.startsWith('en')) return 'en';
+        return 'zh-TW';
+    }
+
+    async function loadLanguageResources(lang) {
+        try {
+            const response = await fetch(addCacheBusting(`/lang/${lang}.json`));
+            if (response.ok) {
+                window.langResources = await response.json();
+            } else {
+                throw new Error('Failed to load language');
+            }
+        } catch (e) {
+            console.log('Language file load failed, using default');
+            window.langResources = {};
+        }
+    }
+
+    function updateUI() {
+        // Batch update text content
+        const textUpdates = [
+            ['page-title', 'pageTitle', '☕ 待辦筆記'],
+            ['done-section-title', 'doneSection', '📦 已完成'],
+            ['edit-modal-title', 'modalTitles.addTask', '新增任務'],
+            ['settings-modal-title', 'settings', '⚙️ 設定'],
+            ['sort-menu-title', 'sortMenu.title', '排序優先級'],
+            ['save-task-btn', 'modalTitles.saveTask', '保存任務'],
+            ['save-task-keep-open-btn', 'saveTaskAndKeepOpen', '保存並繼續'],
+            ['project-view-title', 'projectViewTitle', '📋 專案概覽'],
+            ['btn-delete-task', 'modalTitles.deleteTask', '刪除任務']
+        ];
+
+        textUpdates.forEach(([id, key, fallback]) => {
+            const el = DOM[id];
+            if (el) el.textContent = getLang(key, fallback);
+        });
+
+        // Update placeholders
+        const placeholderUpdates = [
+            ['filter-input', 'searchPlaceholder', '搜尋...'],
+            ['inp-sub', 'taskTitlePlaceholder', '任務標題 (可多行，存檔自動轉單行)'],
+            ['inp-desc', 'taskDescriptionPlaceholder', '詳細描述 (支援多行，會被保存為 desc:"...")']
+        ];
+
+        placeholderUpdates.forEach(([id, key, fallback]) => {
+            const el = DOM[id];
+            if (el) el.placeholder = getLang(key, fallback);
+        });
+
+        // Update labels
+        const labelUpdates = [
+            ['label-priority', 'formLabels.priority', '優先級'],
+            ['label-due', 'formLabels.dueDate', '截止日期'],
+            ['label-threshold', 'formLabels.thresholdDate', '隱藏至'],
+            ['label-recurrence', 'formLabels.recurrence', '重複'],
+            ['label-done-date', 'doneDateLabel', '完成日'],
+            ['settings-theme-label', 'settingsMenu.theme', '主題'],
+            ['settings-confirm-label', 'settingsMenu.confirmDelete', '刪除前確認'],
+            ['settings-show-delete-label', 'settingsMenu.showDeleteButton', '顯示刪除按鈕'],
+            ['settings-show-id-label', 'settingsMenu.showId', '顯示 ID 欄位'],
+            ['settings-main-width-label', 'settingsMenu.mainWidth', '主界面寬度'],
+            ['settings-opacity-label', 'settingsMenu.opacity', '隱藏任務透明度'],
+            ['settings-done-opacity-label', 'settingsMenu.doneOpacity', '已完成任務透明度'],
+            ['label-title-size', 'titleSizeLabel', '標題大小:'],
+            ['label-desc-size', 'descSizeLabel', '描述大小:'],
+            ['tab-properties', 'propertiesTab', '任務屬性'],
+            ['tab-description', 'descriptionTab', '任務描述'],
+            ['settings-todo-file-label', 'settingsMenu.todoFileLastModified', 'todo.txt 修改時間'],
+            ['settings-click-action-label', 'settingsMenu.clickAction', '點擊任務欄位'],
+            ['settings-default-priority-label', 'settingsMenu.defaultPriority', '預設優先級'],
+            ['settings-expand-projects-label', 'settingsMenu.expandProjects', '預設展開專案'],
+            ['opt-click-filter', 'settingsMenu.clickFilter', '添加到搜索欄'],
+            ['opt-click-copy', 'settingsMenu.clickCopy', '複製到剪貼簿']
+        ];
+
+        labelUpdates.forEach(([id, key, fallback]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getLang(key, fallback);
+        });
+
+        // Update button titles/tooltips
+        const btnTitles = [
+            ['btn-add-task', 'buttonTitles.addTask', '新增任務'],
+            ['btn-sort', 'buttonTitles.sort', '排序'],
+            ['btn-settings', 'buttonTitles.settings', '設定'],
+            ['btn-hidden-toggle', 'buttonTitles.showHidden', '顯示/隱藏未來任務'],
+            ['btn-insert-tag', 'buttonTitles.insertTag', '插入標籤'],
+            ['btn-saved-filters', 'buttonTitles.savedFilters', '常用過濾器'],
+            ['btn-insert-tag-modal', 'buttonTitles.insertTag', '插入標籤'],
+            ['btn-insert-time', 'insertCurrentTime', '插入現在時間'],
+            ['btn-repeat-separator', 'buttonTitles.repeatSeparator', '插入重複分隔符'],
+            ['btn-repeat-separator-both', 'buttonTitles.repeatSeparatorBoth', '插入複製分隔符 (內容會同時保留在舊任務和新任務)'],
+            ['btn-today-task-modal', 'toggleTodayTask', '添加/取消今日任務'],
+            ['btn-today-filter', 'filterTodayTask', '過濾今日任務'],
+            ['btn-project-view', 'buttonTitles.projectView', '專案概覽'],
+            ['btn-clear-filter', 'clear', '清空'],
+            ['back-top', 'buttonTitles.backToTop', '回到頂部']
+        ];
+
+        btnTitles.forEach(([id, key, fallback]) => {
+            const el = document.getElementById(id);
+            if (el) el.title = getLang(key, fallback);
+        });
+
+        // Update button text content
+        const btnText = [
+            ['btn-title-large', 'resizeTitleLarge', '▲'],
+            ['btn-title-medium', 'resizeTitleMedium', '↺'],
+            ['btn-title-small', 'resizeTitleSmall', '▼'],
+            ['btn-desc-large', 'resizeDescLarge', '▲'],
+            ['btn-desc-medium', 'resizeDescMedium', '↺'],
+            ['btn-desc-small', 'resizeDescSmall', '▼'],
+            ['btn-insert-time', 'insertCurrentTime', '插入現在時間'],
+            ['btn-repeat-separator', 'repeatSeparator', '分隔符'],
+            ['btn-repeat-separator-both', 'repeatSeparatorBoth', '複製']
+        ];
+
+        btnText.forEach(([id, key, fallback]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getLang(key, fallback);
+        });
+
+        // Update opacity hint and sync info
+        const opacityHintLabel = document.getElementById('opacity-hint-label');
+        if (opacityHintLabel) opacityHintLabel.textContent = getLang('opacityHintLabel', 'Note:');
+        const opacityHintText = document.getElementById('opacity-hint-text');
+        if (opacityHintText) opacityHintText.textContent = getLang('opacityHint', 'Opacity setting only affects hidden tasks (tasks with dashed borders).');
+        const syncInfoLabel = document.getElementById('sync-info-label');
+        if (syncInfoLabel) syncInfoLabel.textContent = getLang('syncInfoLabel', 'Sync Info:');
+        const syncInfoText = document.getElementById('sync-info-text');
+        if (syncInfoText) syncInfoText.innerHTML = getLang('syncInfo', 'Miss, Xiao Jin recommends using <b>Syncthing</b> or <b>>Rclone</b> for file synchronization. This is safer and more in line with your Linux philosophy than implementing E2EE in the browser');
+        render();
+    }
+
+    // === Data Management ===
+    async function loadData() {
+        const t = Date.now();
+        try {
+            const [r1, r2] = await Promise.all([
+                fetch(`/api/read?file=todo&t=${t}`),
+                fetch(`/api/read?file=done&t=${t}`)
+            ]);
+            const d1 = await r1.json(), d2 = await r2.json();
+            tasks = parseLines(d1.content);
+            doneTasks = parseLines(d2.content);
+            render();
+        } catch (e) {
+            console.error('Failed to load data:', e);
+        }
+    }
+
+    async function loadConfig() {
+        try {
+            const r = await fetch(`/api/read?file=config&t=${Date.now()}`);
+            const saved = await r.json();
+            Object.assign(config, saved);
+
+            // Apply config to UI
+            DOM['cfg-theme'].value = config.theme;
+            DOM['cfg-confirm'].checked = config.confirm_delete === true || config.confirm_delete === "true";
+            DOM['cfg-show-delete'].checked = config.show_delete_button === true || config.show_delete_button === "true";
+            DOM['cfg-show-id'].checked = config.show_id === true || config.show_id === "true";
+            DOM['cfg-click-action'].value = config.click_action || 'filter';
+            DOM['cfg-default-priority'].value = config.default_priority || '';
+            DOM['cfg-expand-projects'].checked = config.expand_projects === true || config.expand_projects === "true";
+
+            const mainWidth = config.main_width || 800;
+            DOM['cfg-main-width'].value = mainWidth;
+            DOM['main-width-value'].textContent = mainWidth + 'px';
+            applyMainWidth(mainWidth);
+
+            const opacity = parseFloat(config.opacity) || 1;
+            DOM['cfg-opacity'].value = opacity;
+            DOM['opacity-value'].textContent = opacity.toFixed(1);
+            applyOpacity(opacity);
+
+            const doneOpacity = parseFloat(config.done_opacity) || 0.6;
+            DOM['cfg-done-opacity'].value = doneOpacity;
+            DOM['done-opacity-value'].textContent = doneOpacity.toFixed(1);
+            applyDoneOpacity(doneOpacity);
+
+            applyTheme(config.theme);
+            initSortMenuUI();
+            render();
+        } catch (e) {
+            applyTheme(config.theme);
+            render();
+        }
+    }
+
+    async function saveConfig() {
+        config.theme = DOM['cfg-theme'].value;
+        config.confirm_delete = DOM['cfg-confirm'].checked ? "true" : "false";
+        config.show_delete_button = DOM['cfg-show-delete'].checked ? "true" : "false";
+        config.show_id = DOM['cfg-show-id'].checked ? "true" : "false";
+        config.click_action = DOM['cfg-click-action'].value;
+        config.default_priority = DOM['cfg-default-priority'].value;
+        config.expand_projects = DOM['cfg-expand-projects'].checked ? "true" : "false";
+        config.main_width = parseInt(DOM['cfg-main-width'].value);
+        config.opacity = DOM['cfg-opacity'].value;
+        config.done_opacity = DOM['cfg-done-opacity'].value;
+
+        try {
+            await fetch('/api/write', {
+                method: 'POST',
+                body: JSON.stringify({file: 'config', content: config}),
+                headers: {'Content-Type': 'application/json'}
+            });
+            render();
+        } catch (e) {
+            console.error('Failed to save config:', e);
+        }
+    }
+
+    async function sync() {
+        const t1 = tasks.map(stringifyTask).join('\n');
+        const t2 = doneTasks.map(stringifyTask).join('\n');
+
+        try {
+            const [r1, r2] = await Promise.all([
+                fetch('/api/write', {
+                    method: 'POST',
+                    body: JSON.stringify({file: 'todo', content: t1}),
+                    headers: {'Content-Type': 'application/json'}
+                }),
+                fetch('/api/write', {
+                    method: 'POST',
+                    body: JSON.stringify({file: 'done', content: t2}),
+                    headers: {'Content-Type': 'application/json'}
+                })
+            ]);
+
+            if (!r1.ok) {
+                alert(`${getLang('todoWriteError', 'todo.txt 寫入失敗！')} 狀態碼: ${r1.status}`);
+                return false;
+            }
+            if (!r2.ok) {
+                alert(`${getLang('doneWriteError', 'done.txt 寫入失敗！')} 狀態碼: ${r2.status}`);
+                return false;
+            }
+            console.log('資料保存成功');
+            return true;
+        } catch (error) {
+            console.error("Sync error:", error);
+            alert(getLang('syncError', '儲存操作發生網路錯誤或伺服器無回應！'));
+            return false;
+        }
+    }
+
+    // === Rendering ===
+    function render() {
+        const filterText = DOM['filter-input'].value.trim();
+        const today = todayStr();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomStr = tomorrow.toISOString().split('T')[0];
+        const terms = filterText.split(/\s+/).filter(x => x);
+        const hasSunFilter = terms.some(term => term.toLowerCase().includes('@☀️'));
+
+        // Build filter function
+        const buildFilterFn = (taskList, isDone) => (t) => {
+            if (!showHiddenTasks && t.threshold && t.threshold > today) return false;
+            if (!isDone && showTodayTasks && !isTodayTask(t) && !isOverdueTodayTask(t)) return false;
+            if (terms.length === 0) return true;
+
+            return terms.every(term => {
+                let val = term.includes('today') ? term.replace('today', today) : term;
+                val = val.includes('tomorrow') ? val.replace('tomorrow', tomStr) : val;
+                if (val.startsWith('<=')) return t.due && t.due <= val.slice(2);
+                if (val.startsWith('>=')) return t.due && t.due >= val.slice(2);
+                if (val.startsWith('<')) return t.due && t.due < val.slice(1);
+                if (val.startsWith('>')) return t.due && t.due > val.slice(1);
+
+                if (val.startsWith('pri') && val.length > 3) {
+                    const expr = val.slice(3);
+                    let op, priVal;
+                    if (expr.startsWith('<=')) { op = '<='; priVal = expr.slice(2); }
+                    else if (expr.startsWith('>=')) { op = '>='; priVal = expr.slice(2); }
+                    else if (expr.startsWith('=')) { op = '='; priVal = expr.slice(1); }
+                    else if (expr.startsWith('<')) { op = '<'; priVal = expr.slice(1); }
+                    else if (expr.startsWith('>')) { op = '>'; priVal = expr.slice(1); }
+                    if (op) {
+                        priVal = priVal.toUpperCase();
+                        const effPri = getEffectivePriority(t);
+                        const tPri = effPri ? effPri.charCodeAt(1) : -1;
+                        switch (op) {
+                            case '=':
+                                if (priVal === '!') return !t.pri;
+                                if (/^[A-Z]-[A-Z]$/.test(priVal)) {
+                                    const start = priVal.charCodeAt(0);
+                                    const end = priVal.charCodeAt(2);
+                                    return tPri >= start && tPri <= end;
+                                }
+                                return priVal.split(',').some(p => effPri === `(${p})`);
+                            case '<':  return tPri >= 0 && tPri > priVal.charCodeAt(0);
+                            case '>':  return tPri >= 0 && tPri < priVal.charCodeAt(0);
+                            case '<=': return tPri >= 0 && tPri >= priVal.charCodeAt(0);
+                            case '>=': return tPri >= 0 && tPri <= priVal.charCodeAt(0);
+                        }
+                    }
+                }
+
+                if (val.startsWith('+') || val.startsWith('*')) {
+                    return matchProjectFilter(t.sub, val);
+                }
+                
+                const full = (t.sub + (t.desc || "")).toLowerCase();
+                
+                // Handle future today tasks
+                if (hasSunFilter && !showHiddenTasks) {
+                    const match = t.sub.match(/@☀️\.(\d{8})/);
+                    if (match) {
+                        const todayYYYYMMDD = today.replace(/-/g, '');
+                        if (match[1] > todayYYYYMMDD) return false;
+                    }
+                }
+                
+                return full.includes(val.toLowerCase());
+            });
+        };
+
+        // Filter tasks - keep track of original indices
+        const tasksWithIndex = tasks
+            .map((t, i) => ({ task: t, index: i }))
+            .filter(item => buildFilterFn(tasks, false)(item.task));
+        
+        const doneWithIndex = doneTasks
+            .map((t, i) => ({ task: t, index: i }))
+            .filter(item => buildFilterFn(doneTasks, true)(item.task));
+        
+        const sortedTasks = tasksWithIndex.sort((a, b) => customSorter(a.task, b.task));
+        const sortedDone = doneWithIndex.sort((a, b) => doneSorter(a.task, b.task));
+
+        // Render task list
+        const list = DOM['task-list'];
+        list.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        sortedTasks.forEach(item => {
+            fragment.appendChild(buildItem(item.task, item.index, false));
+        });
+        list.appendChild(fragment);
+
+        // Render done list
+        const dList = DOM['done-list'];
+        dList.innerHTML = '';
+        const doneFragment = document.createDocumentFragment();
+        sortedDone.forEach(item => doneFragment.appendChild(buildItem(item.task, item.index, true)));
+        dList.appendChild(doneFragment);
+
+        // Update UI elements
+        checkDescOverflow();
+
+        // Update done section count
+        const displayIcon = dList.style.display !== 'none' ? '▲' : '▼';
+        const itemsText = getLang('doneSectionItems', '項');
+        if (filterText) {
+            const total = tasksWithIndex.length + doneWithIndex.length;
+            DOM['done-section-count'].textContent = `${doneWithIndex.length}/${total} ${displayIcon}`;
+        } else {
+            DOM['done-section-count'].textContent = `${doneWithIndex.length}${itemsText} ${displayIcon}`;
+        }
+
+        // Update title: show count when filter is active
+        const titleEl = DOM['page-title'];
+        if (filterText) {
+            titleEl.textContent = `☕ ${tasksWithIndex.length}`;
+        } else {
+            titleEl.textContent = getLang('pageTitle', '☕ 待辦筆記');
+        }
+    }
+
+    function matchProjectFilter(subject, filterTag) {
+        const projects = extractProjects(subject);
+        if (projects.length === 0) return false;
+
+        const filterBody = filterTag.startsWith('+') ? filterTag.slice(1) : filterTag;
+        const filterSegments = filterBody.split('.');
+        
+        for (const project of projects) {
+            const projectSegments = project.split('.');
+            if (matchSegments(projectSegments, filterSegments)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function extractProjects(subject) {
+        const projects = [];
+        const regex = /(^|\s)\+(\S+)/g;
+        let match;
+        while ((match = regex.exec(subject)) !== null) {
+            projects.push(match[2]);
+        }
+        return projects;
+    }
+
+    function matchSegments(projectSegments, filterSegments) {
+        if (filterSegments.length === 0) return true;
+        
+        const firstSeg = filterSegments[0];
+        
+        if (firstSeg === '**') {
+            if (filterSegments.length === 1) {
+                return true;
+            }
+            const remainingFilter = filterSegments.slice(1);
+            for (let i = 0; i < projectSegments.length; i++) {
+                if (matchSegments(projectSegments.slice(i), remainingFilter)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        if (projectSegments.length === 0) return false;
+        
+        const firstProject = projectSegments[0];
+        if (!matchSegment(firstProject, firstSeg)) {
+            return false;
+        }
+        
+        return matchSegments(projectSegments.slice(1), filterSegments.slice(1));
+    }
+
+    function matchSegment(projectSeg, filterSeg) {
+        if (filterSeg === '*') return true;
+        if (filterSeg.includes('*')) {
+            const escaped = filterSeg.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+            const regex = '^' + escaped.replace(/\*/g, '.*') + '$';
+            return new RegExp(regex).test(projectSeg);
+        }
+        return projectSeg === filterSeg;
+    }
+
+    function buildItem(t, index, isDone = false) {
+        const div = document.createElement('div');
+        const isThreshold = !isDone && t.threshold && t.threshold > todayStr();
+        div.className = `task-item ${isDone ? 'done-item' : ''} ${isThreshold ? 'threshold-hidden' : ''}`;
+        div.dataset.taskIndex = index;
+
+        // Process subject text
+        let niceSub = escapeHtml(t.sub)
+            .replace(/@☀️\.\d{8}\s*/g, '')
+            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
+                const segments = tag.slice(1).split('.');
+                let cumulative = '';
+                const rendered = segments.map((seg, i) => {
+                    cumulative = cumulative ? cumulative + '.' + seg : seg;
+                    return `<span class="hl-project-segment" data-tag="+${cumulative}">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`;
+                }).join('.');
+                return space + rendered;
+            })
+            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
+
+        // Today task icon
+        let todayIcon = '';
+        const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
+        if (todayMatch) {
+            const assignDate = todayMatch[1];
+            const todayYYYYMMDD = todayStr().replace(/-/g, '');
+            if (assignDate === todayYYYYMMDD) todayIcon = ' ☀️';
+            else if (assignDate < todayYYYYMMDD) todayIcon = ' 😱';
+            else todayIcon = ' 🌙';
+        }
+
+        // Tags
+        const tags = [];
+        const effPri = getEffectivePriority(t);
+        if (effPri) tags.push(`<span class="tag" data-tag="pri=${effPri.slice(1, -1)}" style="background:var(--danger); color:#fff">${effPri}</span>`);
+        if (t.due) tags.push(`<span class="tag" data-tag="${t.due}">📅 ${t.due}</span>`);
+        if (t.threshold) tags.push(`<span class="tag" data-tag="${t.threshold}">⏳ ${t.threshold}</span>`);
+        if (t.rec) tags.push(`<span class="tag" data-tag="${t.rec}">🔄 ${t.rec}</span>`);
+        if ((config.show_id === true || config.show_id === "true") && t.legacyId) tags.push(`<span class="tag" data-tag="#${t.legacyId}">#️⃣ ${t.legacyId}</span>`);
+        if (isDone && t.doneDate) tags.push(`<span class="tag" data-tag="${t.doneDate}" style="background:var(--success); color:#fff">✅ ${t.doneDate}</span>`);
+
+        const showDelete = config.show_delete_button === true || config.show_delete_button === "true";
+        
+        div.innerHTML = `
+            <div class="task-header">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" ${isDone ? 'checked' : ''} data-action="${isDone ? 'uncomplete' : 'complete'}" data-index="${index}">
+                </div>
+                <div class="task-content">
+                    <div class="task-title-area">
+                        <div class="task-subject">
+                            ${niceSub}${todayIcon} ${tags.join('')}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="icon-btn btn-edit" data-index="${index}" title="${getLang('buttonTitles.edit', '編輯')}">✏️</button>
+                        <button class="icon-btn btn-today" data-index="${index}" title="${getLang('toggleTodayTask', '添加/取消今日任務')}">📅</button>
+                        ${showDelete ? `<button class="icon-btn danger btn-delete" data-index="${index}" data-done="${isDone}" title="${getLang('buttonTitles.delete', '刪除')}">🗑️</button>` : ''}
+                    </div>
+                </div>
+            </div>
+            ${t.desc ? `
+                <div class="task-desc-container">
+                    <div class="desc-toggle" data-index="${index}" style="display:none">${getLang('expand', '展開...')}</div>
+                    <div class="task-desc-content" id="desc-${index}">${escapeHtml(t.desc)}</div>
+                </div>` : ''}`;
+
+        return div;
+    }
+
+    function checkDescOverflow() {
+        document.querySelectorAll('.task-desc-content').forEach(el => {
+            const toggle = el.parentElement.querySelector('.desc-toggle');
+            if (toggle) {
+                toggle.style.display = el.scrollHeight > el.clientHeight ? 'block' : 'none';
+            }
+        });
+    }
+
+    // === Project View ===
+    let pvDescCounter = 0;
+
+    function openProjectView() {
+        pvDescCounter = 0;
+        const projectTree = {};
+        const noProjectTasks = [];
+
+        function addTaskToTree(proj, item) {
+            const parts = proj.split('.');
+            let current = projectTree;
+            for (const part of parts) {
+                if (!current[part]) current[part] = { __tasks__: [] };
+                current = current[part];
+            }
+            current.__tasks__.push(item);
+        }
+
+        tasks.forEach((t, i) => {
+            const item = { task: t, index: i, isDone: false };
+            const projects = extractProjects(t.sub);
+            if (projects.length === 0) noProjectTasks.push(item);
+            else projects.forEach(p => addTaskToTree(p, item));
+        });
+        doneTasks.forEach((t, i) => {
+            const item = { task: t, index: i, isDone: true };
+            const projects = extractProjects(t.sub);
+            if (projects.length === 0) noProjectTasks.push(item);
+            else projects.forEach(p => addTaskToTree(p, item));
+        });
+
+        function sortNode(node) {
+            if (node.__tasks__) {
+                const a = node.__tasks__.filter(t => !t.isDone).sort((a, b) => customSorter(a.task, b.task));
+                const d = node.__tasks__.filter(t => t.isDone).sort((a, b) => doneSorter(a.task, b.task));
+                node.__tasks__ = [...a, ...d];
+            }
+            Object.keys(node).filter(k => k !== '__tasks__').forEach(k => sortNode(node[k]));
+        }
+        sortNode(projectTree);
+
+        const npA = noProjectTasks.filter(t => !t.isDone).sort((a, b) => customSorter(a.task, b.task));
+        const npD = noProjectTasks.filter(t => t.isDone).sort((a, b) => doneSorter(a.task, b.task));
+        const sortedNoProject = [...npA, ...npD];
+
+        const content = DOM['project-view-content'];
+        let html = renderProjectViewTree(projectTree, '');
+
+        if (sortedNoProject.length > 0) {
+            const npU = sortedNoProject.filter(t => !t.isDone).length;
+            html += `<div class="pv-no-project">
+                <div class="pv-project-header" onclick="App.toggleProjectViewChildren('pv-no-project')">
+                    <span class="pv-toggle" onclick="event.stopPropagation();App.toggleProjectViewChildren('pv-no-project')">▶</span>
+                    <span class="pv-project-name" style="color:var(--text-color)">${getLang('noProject', '未分類')}</span>
+                    <span class="pv-count">(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)/(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)</span>
+                </div>
+                <div class="pv-children" id="pv-no-project" style="display:none">`;
+            if (sortedNoProject.length >= 3) {
+                const groupId = 'pv-tg-no-project';
+                const groupExpanded = config.expand_projects === true || config.expand_projects === "true";
+                html += `<div class="pv-task-group">
+                    <div class="pv-task-group-header" onclick="App.toggleProjectViewTaskGroup('${groupId}')">
+                        <span class="pv-toggle" style="font-size:0.75em">${groupExpanded ? '▼' : '▶'}</span>
+                        <span>${sortedNoProject.length} ${getLang('tasks', '任務')}</span>
+                    </div>
+                    <div class="pv-task-group-body" id="${groupId}" style="display:${groupExpanded ? 'block' : 'none'}">`;
+                sortedNoProject.forEach(item => { html += buildProjectViewItem(item.task, item.index, item.isDone); });
+                html += `</div></div>`;
+            } else {
+                sortedNoProject.forEach(item => { html += buildProjectViewItem(item.task, item.index, item.isDone); });
+            }
+            html += `</div></div>`;
+        }
+
+        if (!html.trim()) {
+            html = `<div style="padding:40px;text-align:center;color:#888;">${getLang('noTasks', '尚無任務')}</div>`;
+        }
+
+        content.innerHTML = html;
+        DOM['project-view-modal'].querySelector('.modal-box').scrollTop = 0;
+        DOM['project-view-modal'].classList.add('show');
+        requestAnimationFrame(() => checkProjectViewDescOverflow());
+    }
+
+    function closeProjectView() {
+        DOM['project-view-modal'].classList.remove('show');
+    }
+
+    function countAllTasks(node) {
+        let total = 0, unfinished = 0;
+        const direct = node.__tasks__ || [];
+        total += direct.length;
+        unfinished += direct.filter(t => !t.isDone).length;
+        for (const key of Object.keys(node).filter(k => k !== '__tasks__')) {
+            const c = countAllTasks(node[key]);
+            total += c.total;
+            unfinished += c.unfinished;
+        }
+        return { total, unfinished };
+    }
+
+    function renderProjectViewTree(node, prefix) {
+        let html = '';
+        const expanded = config.expand_projects === true || config.expand_projects === "true";
+        const keys = Object.keys(node).filter(k => k !== '__tasks__');
+        for (const key of keys) {
+            const tasks = node[key].__tasks__ || [];
+            const fullPath = prefix ? `${prefix}.${key}` : key;
+            const safeId = fullPath.replace(/[^a-zA-Z0-9\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af_-]/g, '-');
+            const hasChildren = Object.keys(node[key]).some(k => k !== '__tasks__');
+            const all = countAllTasks(node[key]);
+            const dt = tasks.length;
+            const du = tasks.filter(t => !t.isDone).length;
+
+            html += `<div class="pv-node">
+                <div class="pv-project-header" onclick="App.toggleProjectViewChildren('pv-${safeId}')">
+                    <span class="pv-toggle" onclick="event.stopPropagation();App.toggleProjectViewChildren('pv-${safeId}')">${expanded ? '▼' : '▶'}</span>
+                    <span class="pv-project-name" onclick="event.stopPropagation();App.toggleProjectViewDescriptions(event, 'pv-${safeId}')">+${fullPath}</span>
+                    <span class="pv-count">(<b>${dt - du}</b>/<b>${dt}</b>)/(<b>${all.total - all.unfinished}</b>/<b>${all.total}</b>)</span>
+                </div>
+                <div class="pv-children" id="pv-${safeId}" style="display:${expanded ? 'block' : 'none'}">`;
+            if (tasks.length >= 3) {
+                const groupId = `pv-tg-${safeId}`;
+                html += `<div class="pv-task-group">
+                    <div class="pv-task-group-header" onclick="App.toggleProjectViewTaskGroup('${groupId}')">
+                        <span class="pv-toggle" style="font-size:0.75em">${expanded ? '▼' : '▶'}</span>
+                        <span>${tasks.length} ${getLang('tasks', '任務')}</span>
+                    </div>
+                    <div class="pv-task-group-body" id="${groupId}" style="display:${expanded ? 'block' : 'none'}">`;
+                for (const item of tasks) html += buildProjectViewItem(item.task, item.index, item.isDone);
+                html += `</div></div>`;
+            } else {
+                for (const item of tasks) html += buildProjectViewItem(item.task, item.index, item.isDone);
+            }
+            if (hasChildren) html += renderProjectViewTree(node[key], fullPath);
+            html += `</div></div>`;
+        }
+        return html;
+    }
+
+    function buildProjectViewItem(t, index, isDone) {
+        const descId = pvDescCounter++;
+        let niceSub = escapeHtml(t.sub)
+            .replace(/@☀️\.\d{8}\s*/g, '')
+            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
+                const segments = tag.slice(1).split('.');
+                let cumulative = '';
+                const rendered = segments.map((seg, i) => {
+                    cumulative = cumulative ? `${cumulative}.${seg}` : seg;
+                    return `<span class="hl-project-segment" data-tag="+${cumulative}">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`;
+                }).join('.');
+                return space + rendered;
+            })
+            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
+        let todayIcon = '';
+        const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
+        if (todayMatch) {
+            const d = todayMatch[1];
+            const tdy = todayStr().replace(/-/g, '');
+            if (d === tdy) todayIcon = ' ☀️';
+            else if (d < tdy) todayIcon = ' 😱';
+            else todayIcon = ' 🌙';
+        }
+        const tags = [];
+        const effPri = getEffectivePriority(t);
+        if (effPri) tags.push(`<span class="tag" data-tag="pri=${effPri.slice(1, -1)}" style="background:var(--danger);color:#fff">${effPri}</span>`);
+        if (t.due) tags.push(`<span class="tag" data-tag="${t.due}">📅 ${t.due}</span>`);
+        if (t.threshold) tags.push(`<span class="tag" data-tag="${t.threshold}">⏳ ${t.threshold}</span>`);
+        if (t.rec) tags.push(`<span class="tag" data-tag="${t.rec}">🔄 ${t.rec}</span>`);
+        if ((config.show_id === true || config.show_id === "true") && t.legacyId) tags.push(`<span class="tag" data-tag="#${t.legacyId}">#️⃣ ${t.legacyId}</span>`);
+        if (isDone && t.doneDate) tags.push(`<span class="tag" data-tag="${t.doneDate}" style="background:var(--success);color:#fff">✅ ${t.doneDate}</span>`);
+
+        let html = `<div class="pv-task-item ${isDone ? 'done' : ''}">
+            <div class="pv-task-body">
+                <div class="pv-task-subject">${niceSub}${todayIcon} ${tags.join('')}</div>`;
+        if (t.desc) {
+            html += `<div class="task-desc-container" style="margin-top:4px;">
+                <div class="pv-desc-toggle" data-pv-desc-id="${descId}" onclick="App.toggleProjectViewDesc(${descId})" style="display:none">${getLang('expand', '展開...')}</div>
+                <div class="task-desc-content" id="pv-desc-${descId}">${escapeHtml(t.desc)}</div>
+            </div>`;
+        }
+        html += `</div>
+            <button class="pv-jump-btn" onclick="App.jumpToTask(${index},${isDone})" title="${getLang('jumpToTask', '前往任務')}">↗</button>
+        </div>`;
+        return html;
+    }
+
+    function toggleProjectViewTaskGroup(groupId) {
+        const container = document.getElementById(groupId);
+        if (!container) return;
+        const header = container.parentElement.querySelector('.pv-task-group-header');
+        const toggle = header ? header.querySelector('.pv-toggle') : null;
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            if (toggle) toggle.textContent = '▼';
+        } else {
+            container.style.display = 'none';
+            if (toggle) toggle.textContent = '▶';
+        }
+    }
+
+    function toggleProjectViewChildren(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const header = container.previousElementSibling;
+        const toggle = header ? header.querySelector('.pv-toggle') : null;
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            if (toggle) toggle.textContent = '▼';
+        } else {
+            container.style.display = 'none';
+            if (toggle) toggle.textContent = '▶';
+        }
+    }
+
+    function toggleProjectViewDescriptions(e, containerId) {
+        e.stopPropagation();
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const descs = container.querySelectorAll('.task-desc-content');
+        const anyExpanded = Array.from(descs).some(d => d.classList.contains('expanded'));
+        descs.forEach(el => {
+            const btn = el.parentElement.querySelector('.pv-desc-toggle');
+            if (anyExpanded) {
+                el.classList.remove('expanded');
+                if (btn) btn.textContent = getLang('expand', '展開...');
+            } else {
+                el.classList.add('expanded');
+                if (btn) btn.textContent = getLang('collapse', '收起');
+            }
+        });
+    }
+
+    function toggleAllProjectViewNodes() {
+        const content = DOM['project-view-content'];
+        const allChildren = content.querySelectorAll(':scope > .pv-node > .pv-children, :scope > .pv-no-project > .pv-children');
+        const allToggles = content.querySelectorAll('.pv-toggle');
+        const allGroups = content.querySelectorAll('.pv-task-group-body');
+        const allGroupToggles = content.querySelectorAll('.pv-task-group-header .pv-toggle');
+        const anyCollapsed = Array.from(allChildren).some(c => c.style.display === 'none');
+        allChildren.forEach(c => { c.style.display = anyCollapsed ? 'block' : 'none'; });
+        allToggles.forEach(t => { t.textContent = anyCollapsed ? '▼' : '▶'; });
+        allGroups.forEach(g => { g.style.display = anyCollapsed ? 'block' : 'none'; });
+        allGroupToggles.forEach(t => { t.textContent = anyCollapsed ? '▼' : '▶'; });
+    }
+
+    function toggleProjectViewDesc(descId) {
+        const el = document.getElementById(`pv-desc-${descId}`);
+        const btn = document.querySelector(`.pv-desc-toggle[data-pv-desc-id="${descId}"]`);
+        if (!el || !btn) return;
+        if (el.classList.contains('expanded')) {
+            el.classList.remove('expanded');
+            btn.textContent = getLang('expand', '展開...');
+        } else {
+            el.classList.add('expanded');
+            btn.textContent = getLang('collapse', '收起');
+            setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'nearest'}), 100);
+        }
+    }
+
+    function checkProjectViewDescOverflow() {
+        document.querySelectorAll('#project-view-content .task-desc-content').forEach(el => {
+            const toggle = el.parentElement.querySelector('.pv-desc-toggle');
+            if (toggle) toggle.style.display = el.scrollHeight > el.clientHeight ? 'block' : 'none';
+        });
+    }
+
+    function jumpToTask(index, isDone) {
+        closeProjectView();
+        DOM['filter-input'].value = '';
+        if (isDone && DOM['done-list'].style.display === 'none') {
+            DOM['done-list'].style.display = 'block';
+        }
+        render();
+        requestAnimationFrame(() => {
+            const sel = isDone
+                ? `#done-list .task-item[data-task-index="${index}"]`
+                : `.task-item[data-task-index="${index}"]`;
+            const el = document.querySelector(sel);
+            if (el) {
+                el.scrollIntoView({behavior: 'smooth', block: 'center'});
+                el.style.transition = 'box-shadow 0.3s';
+                el.style.boxShadow = '0 0 0 3px var(--accent)';
+                setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+            }
+        });
+    }
+
+    // === Event Delegation ===
+    function initEventDelegation() {
+        document.body.addEventListener('click', (e) => {
+            // Close float menus
+            if (!e.target.closest('.float-menu') && !e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.float-menu').forEach(el => el.classList.remove('show'));
+            }
+
+            // Task item clicks
+            const taskItem = e.target.closest('.task-item');
+            if (taskItem) {
+                const taskIndex = parseInt(taskItem.dataset.taskIndex);
+                const isDone = taskItem.classList.contains('done-item');
+
+                // Checkbox
+                if (e.target.matches('input[type="checkbox"][data-action]')) {
+                    e.preventDefault();
+                    const action = e.target.dataset.action;
+                    if (action === 'complete') completeTask(taskIndex);
+                    else if (action === 'uncomplete') uncompleteTask(taskIndex);
+                    return;
+                }
+
+                // Edit button
+                if (e.target.closest('.btn-edit')) {
+                    openEditModal(taskIndex, isDone);
+                    return;
+                }
+
+                // Today button
+                if (e.target.closest('.btn-today')) {
+                    toggleTaskToday(taskIndex);
+                    return;
+                }
+
+                // Delete button
+                if (e.target.closest('.btn-delete')) {
+                    deleteTask(taskIndex, isDone);
+                    return;
+                }
+
+                // Description toggle
+                if (e.target.closest('.desc-toggle')) {
+                    toggleDesc(parseInt(e.target.closest('.desc-toggle').dataset.index));
+                    return;
+                }
+
+                // Tag click (project/context/priority/date/etc)
+                const tagEl = e.target.closest('[data-tag]');
+                if (tagEl) {
+                    handleFieldClick(tagEl.dataset.tag);
+                    return;
+                }
+
+                // Title click - append plain title text to search filter
+                if (e.target.closest('.task-subject')) {
+                    const t = isDone ? doneTasks[taskIndex] : tasks[taskIndex];
+                    if (!t) return;
+                    let filterText = t.sub
+                        .replace(/@☀️\.\d{8}/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    if (filterText) {
+                        handleFieldClick(filterText);
+                    }
+                    return;
+                }
+            }
+        });
+    }
+
+    // === Task Operations ===
+    function completeTask(index) {
+        const t = tasks[index];
+        if (!t) return;
+        t.done = true;
+        t.doneDate = todayStr();
+        const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
+        const hasTodayContext = todayMatch !== null;
+        t.sub = t.sub.replace(/@☀️\.\d{8}/g, '').trim();
+
+        if (t.rec) handleRecurrence(t, hasTodayContext);
+        doneTasks.unshift(t);
+        tasks.splice(index, 1);
+        render();
+        sync();
+    }
+
+    function uncompleteTask(index) {
+        const t = doneTasks[index];
+        if (!t) return;
+        t.done = false;
+        t.doneDate = null;
+        tasks.push(t);
+        doneTasks.splice(index, 1);
+        render();
+        sync();
+    }
+
+    function deleteTask(index, isDone) {
+        const shouldConfirm = config.confirm_delete === true || config.confirm_delete === "true";
+
+        if (shouldConfirm && !confirm(getLang('deleteConfirm', '確定刪除？'))) return;
+
+        if (isDone) doneTasks.splice(index, 1);
+        else tasks.splice(index, 1);
+        render();
+        sync();
+    }
+
+    function deleteTaskFromEdit() {
+        if (editingIndex === null) return;
+        deleteTask(editingIndex, editingIsDone);
+        closeEditModal();
+    }
+
+    function saveTask() {
+        const result = saveTaskData();
+        if (result) {
+            closeEditModal();
+        }
+    }
+
+    function saveTaskAndKeepOpen() {
+        const result = saveTaskData();
+        if (result && editingIndex === null) {
+            editingIndex = tasks.length - 1;
+            editingIsDone = false;
+        }
+    }
+
+    function saveTaskData() {
+        const sub = DOM['inp-sub'].value.replace(/\n/g, ' ').trim();
+        if (!sub) {
+            alert(getLang('titleRequired', '請輸入標題'));
+            return false;
+        }
+
+        const dueDate = DOM['inp-due'].value;
+        let thresholdDate = DOM['inp-t'].value;
+
+        if (dueDate && thresholdDate && thresholdDate > dueDate) {
+            alert(getLang('thresholdAfterDue', '隱藏期晚於截止期，已自動修正為截止期同一天'));
+            thresholdDate = dueDate;
+            DOM['inp-t'].value = thresholdDate;
+        }
+
+        const recValue = normalizeRecurrence(DOM['inp-rec'].value);
+        const newTask = {
+            pri: DOM['inp-pri'].value,
+            sub: sub,
+            desc: DOM['inp-desc'].value,
+            due: dueDate,
+            threshold: thresholdDate,
+            rec: recValue,
+            created: todayStr(),
+            done: false
+        };
+
+        if (editingIndex !== null) {
+            const list = editingIsDone ? doneTasks : tasks;
+            if (editingIndex >= 0 && editingIndex < list.length) {
+                newTask.created = list[editingIndex].created || todayStr();
+                if (editingIsDone) {
+                    newTask.done = true;
+                    newTask.doneDate = DOM['inp-done-date'].value || list[editingIndex].doneDate;
+                }
+                list[editingIndex] = newTask;
+            }
+        } else {
+            tasks.push(newTask);
+        }
+
+        render();
+        sync();
+        return true;
+    }
+
+    // === Modal Operations ===
+    function openEditModal(index = null, isDone = false) {
+        editingIndex = index;
+        editingIsDone = isDone;
+        
+        let t = {};
+        if (index !== null) {
+            t = isDone ? doneTasks[index] : tasks[index];
+        }
+
+        const modalTitle = index !== null 
+            ? getLang('modalTitles.editTask', '編輯任務')
+            : getLang('modalTitles.addTask', '新增任務');
+        DOM['edit-modal-title'].textContent = modalTitle;
+        DOM['inp-sub'].value = t.sub || '';
+        DOM['inp-desc'].value = t.desc || '';
+        DOM['inp-pri'].value = t.pri || '';
+        DOM['inp-due'].value = t.due || '';
+        DOM['inp-t'].value = t.threshold || '';
+        DOM['inp-rec'].value = t.rec || '';
+        
+        // Show/hide done date field
+        if (isDone && t) {
+            DOM['done-date-row'].style.display = 'flex';
+            DOM['inp-done-date'].value = t.doneDate || '';
+        } else {
+            DOM['done-date-row'].style.display = 'none';
+            DOM['inp-done-date'].value = '';
+        }
+
+        switchTab('properties');
+        DOM['edit-modal'].classList.add('show');
+    }
+
+    function closeEditModal() {
+        DOM['edit-modal'].classList.remove('show');
+        editingIndex = null;
+        editingIsDone = false;
+    }
+
+    function toggleSettingsModal() {
+        DOM['settings-modal'].classList.toggle('show');
+        if (DOM['settings-modal'].classList.contains('show')) {
+            loadTodoFileInfo();
+        }
+    }
+
+    async function loadTodoFileInfo() {
+        try {
+            const r = await fetch(`/api/fileinfo?file=todo&t=${Date.now()}`);
+            const data = await r.json();
+            if (data.mtime) {
+                const date = new Date(data.mtime * 1000);
+                const dateStr = date.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                const timeStr = date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('todo-last-modified').textContent = `${dateStr} ${timeStr}`;
+            }
+        } catch (e) {
+            document.getElementById('todo-last-modified').textContent = '-';
+        }
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        DOM[`tab-content-${tabName}`].classList.add('active');
+    }
+
+    // === Filter & Sort ===
+    function toggleDoneSection() {
+        const d = DOM['done-list'];
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+        render();
+    }
+
+    function clearFilter() {
+        DOM['filter-input'].value = '';
+        render();
+    }
+
+    function appendFilter(txt) {
+        DOM['filter-input'].value += ' ' + txt;
+        render();
+    }
+
+    function handleFieldClick(val) {
+        if (config.click_action === 'copy') {
+            navigator.clipboard.writeText(val).catch(() => {});
+        } else {
+            appendFilter(val);
+        }
+    }
+
+    function toggleShowHidden() {
+        showHiddenTasks = !showHiddenTasks;
+        const btn = document.getElementById('btn-hidden-toggle');
+        btn.textContent = showHiddenTasks ? '👀' : '🫣';
+        btn.style.border = showHiddenTasks ? '1px solid var(--accent)' : '1px solid transparent';
+        render();
+    }
+
+    function toggleTodayFilter() {
+        const today = todayStr().replace(/-/g, '');
+        const filterInput = DOM['filter-input'];
+        const currentFilter = filterInput.value.trim();
+
+        if (currentFilter.includes('@☀️')) {
+            filterInput.value = currentFilter.replace(/@☀️(\.\d{8})?/g, '').trim();
+        } else {
+            filterInput.value = (currentFilter + ' @☀️').trim();
+        }
+        render();
+    }
+
+    function toggleTodayTaskInModal() {
+        const inpSub = DOM['inp-sub'];
+        const currentSub = inpSub.value;
+        const todayYYYYMMDD = todayStr().replace(/-/g, '');
+
+        const match = currentSub.match(/@☀️\.(\d{8})/);
+        if (match) {
+            inpSub.value = currentSub.replace(/@☀️\.\d{8}/g, '').trim();
+        } else {
+            inpSub.value = (currentSub + ' @☀️.' + todayYYYYMMDD).trim();
+        }
+    }
+
+    function toggleTaskToday(index) {
+        const task = tasks[index];
+        if (!task) return;
+
+        const todayYYYYMMDD = todayStr().replace(/-/g, '');
+        const match = task.sub.match(/@☀️\.(\d{8})/);
+
+        if (match) {
+            task.sub = task.sub.replace(/@☀️\.\d{8}/g, '').trim();
+        } else {
+            task.sub = (task.sub + ' @☀️.' + todayYYYYMMDD).trim();
+        }
+        render();
+        sync();
+    }
+
+    function isTodayTask(task) {
+        const match = task.sub.match(/@☀️\.(\d{8})/);
+        if (!match) return false;
+        return match[1] === todayStr().replace(/-/g, '');
+    }
+
+    function isOverdueTodayTask(task) {
+        const match = task.sub.match(/@☀️\.(\d{8})/);
+        if (!match) return false;
+        return match[1] < todayStr().replace(/-/g, '');
+    }
+
+    // === Sort Menu ===
+    function initSortMenuUI() {
+        const c = DOM['sort-options-container'];
+        c.innerHTML = '';
+        const opts = [
+            {v: 'pri', t: getLang('formLabels.priority', '優先級')},
+            {v: 'due', t: getLang('formLabels.dueDate', '截止日')},
+            {v: 'created', t: getLang('createdDateLabel', '建立日')},
+            {v: 'sub', t: getLang('formLabels.subject', '標題')}
+        ];
+
+        for (let i = 0; i < 3; i++) {
+            const row = document.createElement('div');
+            row.style.cssText = 'padding:5px; font-size:0.9em;';
+            row.innerHTML = `
+                #${i + 1} <select onchange="App.updateSort(${i},'key',this.value)">
+                    <option value="">(無)</option>
+                    ${opts.map(o => `<option value="${o.v}">${o.t}</option>`).join('')}
+                </select>
+                <input type="checkbox" onchange="App.updateSort(${i},'asc',this.checked)"> ${getLang('ascending', '正序')}
+            `;
+            const sel = row.querySelector('select');
+            const chk = row.querySelector('input');
+            if (config.sort_keys[i]) {
+                sel.value = config.sort_keys[i].key;
+                chk.checked = config.sort_keys[i].asc;
+            }
+            c.appendChild(row);
+        }
+
+        // Init done sort menu
+        initDoneSortMenuUI();
+    }
+
+    function initDoneSortMenuUI() {
+        const c = DOM['done-sort-options-container'];
+        if (!c) return;
+        c.innerHTML = '';
+        const opts = [
+            {v: 'pri', t: getLang('formLabels.priority', '優先級')},
+            {v: 'due', t: getLang('formLabels.dueDate', '截止日')},
+            {v: 'created', t: getLang('createdDateLabel', '建立日')},
+            {v: 'sub', t: getLang('formLabels.subject', '標題')},
+            {v: 'doneDate', t: getLang('doneDateLabel', '完成日')}
+        ];
+
+        for (let i = 0; i < 3; i++) {
+            const row = document.createElement('div');
+            row.style.cssText = 'padding:5px; font-size:0.9em;';
+            row.innerHTML = `
+                #${i + 1} <select onchange="App.updateDoneSort(${i},'key',this.value)">
+                    <option value="">(無)</option>
+                    ${opts.map(o => `<option value="${o.v}">${o.t}</option>`).join('')}
+                </select>
+                <input type="checkbox" onchange="App.updateDoneSort(${i},'asc',this.checked)"> ${getLang('ascending', '正序')}
+            `;
+            const sel = row.querySelector('select');
+            const chk = row.querySelector('input');
+            if (config.done_sort_keys[i]) {
+                sel.value = config.done_sort_keys[i].key;
+                chk.checked = config.done_sort_keys[i].asc;
+            }
+            c.appendChild(row);
+        }
+    }
+
+    function updateSort(i, k, v) {
+        while (config.sort_keys.length <= i) config.sort_keys.push({key: '', asc: true});
+        config.sort_keys[i][k] = v;
+        saveConfig();
+        render();
+    }
+
+    function updateDoneSort(i, k, v) {
+        while (config.done_sort_keys.length <= i) config.done_sort_keys.push({key: '', asc: true});
+        config.done_sort_keys[i][k] = v;
+        saveConfig();
+        render();
+    }
+
+    function customSorter(a, b) {
+        for (const s of config.sort_keys) {
+            if (!s.key) continue;
+            let vA = a[s.key], vB = b[s.key];
+            if (s.key === 'pri') {
+                vA = vA || config.default_priority;
+                vB = vB || config.default_priority;
+                if (!vA && !vB) continue;
+            } else if (s.key === 'due' || s.key === 'threshold') {
+                vA = vA || '9999-99-99';
+                vB = vB || '9999-99-99';
+            } else {
+                vA = vA || '';
+                vB = vB || '';
+            }
+            if (vA < vB) return s.asc ? -1 : 1;
+            if (vA > vB) return s.asc ? 1 : -1;
+        }
+        return 0;
+    }
+
+    function doneSorter(a, b) {
+        for (const s of config.done_sort_keys) {
+            if (!s.key) continue;
+            let vA = a[s.key], vB = b[s.key];
+            if (s.key === 'pri') {
+                if (!vA && !vB) continue;
+                if (!vA) return 1;
+                if (!vB) return -1;
+            } else if (s.key === 'due' || s.key === 'threshold' || s.key === 'doneDate') {
+                vA = vA || '9999-99-99';
+                vB = vB || '9999-99-99';
+            } else {
+                vA = vA || '';
+                vB = vB || '';
+            }
+            if (vA < vB) return s.asc ? -1 : 1;
+            if (vA > vB) return s.asc ? 1 : -1;
+        }
+        return 0;
+    }
+
+    function toggleSortMenu(e) {
+        e.stopPropagation();
+        initSortMenuUI();
+        positionMenu(e.target, DOM['sort-menu']);
+    }
+
+    function positionMenu(btn, menu) {
+        const rect = btn.getBoundingClientRect();
+        menu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+        if (rect.left > window.innerWidth / 2) {
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.left = 'auto';
+        } else {
+            menu.style.left = rect.left + 'px';
+            menu.style.right = 'auto';
+        }
+        menu.classList.add('show');
+    }
+
+    // === Tag & Filter Menus ===
+    function openTagMenu(e, targetId) {
+        e.stopPropagation();
+        const menu = DOM['tag-menu'];
+        const tags = new Set();
+        [...tasks, ...doneTasks].forEach(t => {
+            t.sub.match(/(^|\s)([+@]\S+)/g)?.forEach(m => {
+                if (!m.match(/@☀️\.\d{8}/)) tags.add(m.trim());
+            });
+        });
+
+        menu.classList.add('wide');
+        menu.innerHTML = tags.size 
+            ? Array.from(tags).sort().map(tag => 
+                `<div class="menu-item" onclick="App.appendTagToInput('${targetId}', '${tag}')">${tag}</div>`
+              ).join('')
+            : `<div class="menu-empty">${getLang('noTags', '無標籤')}</div>`;
+
+        positionMenu(e.target, menu);
+    }
+
+    function openContextMenu(e, targetId) {
+        e.stopPropagation();
+        const menu = DOM['tag-menu'];
+        const contexts = new Set();
+        [...tasks, ...doneTasks].forEach(t => {
+            t.sub.match(/(^|\s)(@\S+)/g)?.forEach(m => {
+                if (!m.match(/@☀️\.\d{8}/)) contexts.add(m.trim());
+            });
+        });
+        menu.classList.add('wide');
+        menu.innerHTML = contexts.size 
+            ? Array.from(contexts).sort().map(tag => 
+                `<div class="menu-item" onclick="App.appendTagToInput('${targetId}', '${tag}')">${tag}</div>`
+              ).join('')
+            : `<div class="menu-empty">${getLang('noContexts', '無上下文')}</div>`;
+        positionMenu(e.target, menu);
+    }
+
+    function openProjectMenu(e, targetId) {
+        e.stopPropagation();
+        const menu = DOM['tag-menu'];
+        const projectSet = new Set();
+        const projectTree = {};
+        
+        [...tasks, ...doneTasks].forEach(t => {
+            t.sub.match(/(^|\s)\+(\S+)/g)?.forEach(m => {
+                const proj = m.trim();
+                projectSet.add(proj);
+                const parts = proj.split('.');
+                let current = projectTree;
+                parts.forEach((part, idx) => {
+                    if (!current[part]) current[part] = { _full: idx === parts.length - 1 ? proj : null };
+                    current = current[part];
+                });
+            });
+        });
+
+        const allProjects = Array.from(projectSet).sort();
+        const isFlatMode = !allProjects.some(p => p.includes('.'));
+
+        let html = `<div class="menu-header" style="font-size:0.85em; color:#888; margin-bottom:4px;">
+            ${isFlatMode ? '平攤式' : '階層式'} - 點擊插入
+            <span style="float:right; cursor:pointer; color:var(--accent);" onclick="App.toggleAllProjectChildren(event)">全部展開/摺疊</span>
+        </div>`;
+        
+        if (isFlatMode) {
+            html += allProjects.map(p => 
+                `<div class="menu-item" onclick="App.appendTagToInput('${targetId}', '${p}')">${p}</div>`
+            ).join('');
+        } else {
+            const expanded = config.expand_projects === true || config.expand_projects === "true";
+            function renderTree(node, prefix = '', depth = 0) {
+                let result = '';
+                const keys = Object.keys(node).filter(k => k !== '_full');
+                for (const key of keys) {
+                    if (key === '_full') continue;
+                    const fullPath = prefix ? `${prefix}.${key}` : key;
+                    const hasChildren = Object.keys(node[key]).length > 1 || (Object.keys(node[key]).length === 1 && !node[key]._full);
+                    const childrenContainerId = `proj-children-${fullPath.replace(/\./g, '-')}`;
+                    
+                    if (node[key]._full) {
+                        result += `<div class="menu-item" onclick="App.appendTagToInput('${targetId}', '${fullPath}')">${fullPath}</div>`;
+                    }
+                    if (hasChildren) {
+                        result += `<div class="menu-item" style="padding-left:12px; display:flex; align-items:center;">
+                            <span class="proj-toggle" style="cursor:pointer; margin-right:4px;" onclick="App.toggleProjectChildren('${childrenContainerId}', event)">${expanded ? '▼' : '▶'}</span>
+                            <span style="color:var(--project-color); cursor:pointer;" onclick="App.appendTagToInput('${targetId}', '${fullPath}')">${key}</span>
+                        </div>`;
+                        result += `<div class="project-children" id="${childrenContainerId}" style="padding-left:24px;${expanded ? '' : ' display:none'}">`;
+                        result += renderTree(node[key], fullPath, depth + 1);
+                        result += `</div>`;
+                    }
+                }
+                return result;
+            }
+            html += renderTree(projectTree);
+        }
+        
+        html += `<div class="menu-divider"></div>`;
+        html += `<div class="menu-item" style="color:var(--accent);" onclick="App.appendTagToInput('${targetId}', 'new-project')">+ New Project</div>`;
+        
+        menu.classList.remove('wide');
+        menu.innerHTML = html;
+        positionMenu(e.target, menu);
+    }
+
+    function appendTagToInput(targetId, tag) {
+        const inp = document.getElementById(targetId);
+        if (!tag.startsWith('@') && !tag.startsWith('+')) {
+            tag = '+' + tag;
+        }
+        inp.value = (inp.value + ' ' + tag).trim();
+        if (targetId === 'filter-input') render();
+        DOM['tag-menu'].classList.remove('show');
+    }
+
+    function toggleProjectChildren(containerId, e) {
+        if (e) e.stopPropagation();
+        const container = document.getElementById(containerId);
+        const toggle = document.getElementById('toggle-' + containerId);
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            if (toggle) toggle.textContent = '▼';
+        } else {
+            container.style.display = 'none';
+            if (toggle) toggle.textContent = '▶';
+        }
+    }
+
+    function toggleAllProjectChildren(e) {
+        e.stopPropagation();
+        const allChildren = document.querySelectorAll('.project-children');
+        const allToggles = document.querySelectorAll('.proj-toggle');
+        const anyExpanded = Array.from(allChildren).some(c => c.style.display !== 'none');
+        
+        allChildren.forEach(c => c.style.display = anyExpanded ? 'none' : 'block');
+        allToggles.forEach(t => t.textContent = anyExpanded ? '▶' : '▼');
+    }
+
+    function appendFilterToInput(targetId, tag) {
+        const inp = document.getElementById(targetId);
+        inp.value = (inp.value + ' ' + tag).trim();
+        if (targetId === 'filter-input') render();
+        DOM['tag-menu'].classList.remove('show');
+    }
+
+    function toggleSavedFilters(e) {
+        e.stopPropagation();
+        const menu = DOM['filter-menu'];
+        let html = `<div class="menu-item" style="font-weight:bold; border-bottom:1px solid #ccc" onclick="App.saveCurrentFilter()">+ ${getLang('saveCurrentFilter', '儲存當前過濾')}</div>`;
+
+        if (config.saved_filters && config.saved_filters.length > 0) {
+            config.saved_filters.forEach((f, idx) => {
+                html += `<div class="menu-item"><span onclick="App.applyFilter('${f.q}')">${f.name}</span> <span style="float:right; color:red; margin-left:10px;" onclick="App.removeFilter(event, ${idx})">✕</span></div>`;
+            });
+        } else {
+            html += `<div class="menu-empty">${getLang('noSavedFilters', '尚無儲存的過濾器')}</div>`;
+        }
+        menu.innerHTML = html;
+        positionMenu(e.target, menu);
+    }
+
+    function removeFilter(e, idx) {
+        e.stopPropagation();
+        if (confirm(getLang('deleteFilterConfirm', '刪除此過濾器？'))) {
+            config.saved_filters.splice(idx, 1);
+            saveConfig();
+            DOM['filter-menu'].classList.remove('show');
+        }
+    }
+
+    function saveCurrentFilter() {
+        const q = DOM['filter-input'].value.trim();
+        if (!q) return alert(getLang('filterInputEmpty', '過濾欄是空的'));
+        const name = prompt(getLang('nameFilter', '請為此過濾器命名:'), q);
+        if (name) {
+            if (!config.saved_filters) config.saved_filters = [];
+            config.saved_filters.push({name, q});
+            saveConfig();
+            DOM['filter-menu'].classList.remove('show');
+        }
+    }
+
+    function applyFilter(q) {
+        DOM['filter-input'].value = q;
+        render();
+        DOM['filter-menu'].classList.remove('show');
+    }
+
+    // === UI Helpers ===
+    function applyTheme(n) {
+        document.body.setAttribute('data-theme', n);
+    }
+
+    function applyMainWidth(width) {
+        const w = parseInt(width);
+        document.documentElement.style.setProperty('--main-width', w + 'px');
+        DOM['main-width-value'].textContent = w + 'px';
+    }
+
+    function applyOpacity(value) {
+        document.documentElement.style.setProperty('--hidden-opacity', value);
+        DOM['opacity-value'].textContent = parseFloat(value).toFixed(1);
+    }
+
+    function applyDoneOpacity(value) {
+        document.documentElement.style.setProperty('--done-opacity', value);
+        DOM['done-opacity-value'].textContent = parseFloat(value).toFixed(1);
+    }
+
+    function toggleDesc(index) {
+        const el = document.getElementById(`desc-${index}`);
+        const btn = document.querySelector(`.desc-toggle[data-index="${index}"]`);
+        if (el.classList.contains('expanded')) {
+            el.classList.remove('expanded');
+            btn.textContent = getLang('expand', '展開...');
+        } else {
+            el.classList.add('expanded');
+            btn.textContent = getLang('collapse', '收起');
+            setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'nearest'}), 100);
+        }
+    }
+
+    // === Input Resizing ===
+    const calculateOptimalLines = (content, minLines, baseCharsPerLine) => {
+        if (!content) return minLines;
+        const lines = content.split('\n');
+        let wrappedLines = 0;
+        lines.forEach(line => {
+            wrappedLines += Math.ceil(line.length / baseCharsPerLine);
+        });
+        const required = Math.max(lines.length, wrappedLines);
+        if (required <= minLines) return minLines;
+        if (required <= 8) return required;
+        if (required <= 15) return required + 1;
+        if (required <= 25) return required + 2;
+        return Math.min(required + 3, 35);
+    };
+
+    function resizeTitleInput(action) {
+        const el = DOM['inp-sub'];
+        const lineHeight = 24;
+        const currentLines = Math.round((parseInt(el.style.height) || 60) / lineHeight);
+        let newLines;
+
+        if (action === 'large') newLines = Math.min(currentLines + 1, 80);
+        else if (action === 'small') newLines = Math.max(currentLines - 1, 1);
+        else newLines = currentLines === 3 ? calculateOptimalLines(el.value, 3, 40) : 3;
+
+        el.style.height = (newLines * lineHeight) + 'px';
+        el.focus();
+    }
+
+    function resizeDescInput(action) {
+        const el = DOM['inp-desc'];
+        const lineHeight = 24;
+        const currentLines = Math.round((parseInt(el.style.height) || 100) / lineHeight);
+        let newLines;
+
+        if (action === 'large') newLines = Math.min(currentLines + 5, 80);
+        else if (action === 'small') newLines = Math.max(currentLines - 5, 1);
+        else newLines = currentLines === 4 ? calculateOptimalLines(el.value, 4, 50) : 4;
+
+        el.style.height = (newLines * lineHeight) + 'px';
+        el.focus();
+    }
+
+    // === Text Insertion ===
+    function insertDateToDesc() {
+        const now = new Date();
+        const str = `${now.toISOString().split('T')[0]} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        insertTextAtCursor(DOM['inp-desc'], `[${str}] `);
+    }
+
+    function insertRepeatSeparator() {
+        insertTextAtCursor(DOM['inp-desc'], '\n' + REPEAT_SEPARATOR + '\n');
+    }
+
+    function insertRepeatSeparatorBoth() {
+        insertTextAtCursor(DOM['inp-desc'], '\n' + REPEAT_SEPARATOR_BOTH + '\n');
+    }
+
+    function insertTextAtCursor(el, text) {
+        if (el.selectionStart !== undefined) {
+            const start = el.selectionStart;
+            const before = el.value.substring(0, start);
+            const after = el.value.substring(el.selectionEnd);
+            el.value = before + text + after;
+            el.selectionStart = el.selectionEnd = start + text.length;
+        } else {
+            el.value += text;
+        }
+        el.focus();
+    }
+
+    function renumberNumberedItems() {
+        const el = DOM['inp-desc'];
+        const lines = el.value.split('\n');
+        const result = [];
+        const counters = {};
+
+        for (const line of lines) {
+            const indentMatch = line.match(/^[\s]*/);
+            const indent = indentMatch ? indentMatch[0] : '';
+            const content = line.substring(indent.length);
+            const numMatch = content.match(/^(\d+)\.(\s|$)/);
+
+            if (numMatch) {
+                if (!counters[indent]) counters[indent] = 1;
+                const after = content.substring(numMatch[0].length);
+                result.push(indent + counters[indent] + '.' + (after.startsWith(' ') ? '' : ' ') + after);
+                counters[indent]++;
+            } else {
+                result.push(line);
+                if (content.trim() !== '') counters[indent] = 1;
+            }
+        }
+        el.value = result.join('\n');
+        el.focus();
+    }
+
+    // === Recurrence Handling ===
+    function handleRecurrence(t, hasTodayContext = false) {
+        const rec = t.rec || '';
+        if (!rec) return;
+
+        let match = rec.match(/^(rec:)?(\+{0,2})(\d+)([dmy])/);
+        if (!match) {
+            const numMatch = rec.match(/\d+/);
+            if (numMatch) match = ['rec:+' + numMatch[0] + 'd', 'rec:', '+', numMatch[0], 'd'];
+            else return;
+        }
+
+        const prefix = match[2];
+        const val = parseInt(match[3]);
+        const unit = match[4];
+        const today = todayStr();
+        let newDue;
+
+        if (prefix === '') {
+            if (!t.due) return;
+            const base = new Date(t.due);
+            if (unit === 'm') base.setMonth(base.getMonth() + val);
+            else if (unit === 'y') base.setFullYear(base.getFullYear() + val);
+            else base.setDate(base.getDate() + val);
+            newDue = base.toISOString().split('T')[0];
+        } else if (prefix === '+') {
+            const base = new Date(today);
+            if (unit === 'm') base.setMonth(base.getMonth() + val);
+            else if (unit === 'y') base.setFullYear(base.getFullYear() + val);
+            else base.setDate(base.getDate() + val);
+            newDue = base.toISOString().split('T')[0];
+        } else if (prefix === '++') {
+            if (val === 0) {
+                newDue = today;
+            } else {
+                const base = new Date(t.due);
+                let testDate = new Date(base);
+                while (testDate <= new Date(today)) {
+                    if (unit === 'm') testDate.setMonth(testDate.getMonth() + val);
+                    else if (unit === 'y') testDate.setFullYear(testDate.getFullYear() + val);
+                    else testDate.setDate(testDate.getDate() + val);
+                }
+                newDue = testDate.toISOString().split('T')[0];
+            }
+        }
+
+        let newThres = null;
+        if (t.threshold && t.due) {
+            const diff = new Date(t.due).getTime() - new Date(t.threshold).getTime();
+            const nextThresTime = new Date(newDue).getTime() - diff;
+            newThres = new Date(nextThresTime).toISOString().split('T')[0];
+        }
+
+        const next = {
+            ...t, created: todayStr(), done: false, doneDate: null,
+            due: newDue, threshold: newThres
+        };
+
+        if (t.desc && t.desc.includes(REPEAT_SEPARATOR)) {
+            const parts = t.desc.split(REPEAT_SEPARATOR);
+            next.desc = parts[0].trim();
+            t.desc = parts.slice(1).join(REPEAT_SEPARATOR).trim();
+        } else if (t.desc && t.desc.includes(REPEAT_SEPARATOR_BOTH)) {
+            const parts = t.desc.split(REPEAT_SEPARATOR_BOTH);
+            const aboveContent = parts[0].trim();
+            const belowContent = parts.slice(1).join(REPEAT_SEPARATOR_BOTH).trim();
+            next.desc = aboveContent;
+            t.desc = (aboveContent + (belowContent ? '\n' + belowContent : '')).trim();
+        }
+
+        if (hasTodayContext) {
+            const newDate = (newThres || newDue).replace(/-/g, '');
+            next.sub = next.sub + ' @☀️.' + newDate;
+        } else {
+            next.sub = next.sub.replace(/@☀️\.\d{8}/g, '').trim();
+        }
+
+        tasks.push(next);
+    }
+
+    function normalizeRecurrence(recValue) {
+        if (!recValue || recValue.trim() === '') return '';
+        let value = recValue.trim().replace(/^rec:/i, '');
+        const match = value.match(/^(\+{0,2})(\d+)([dmy])$/i);
+        if (match) return 'rec:' + value;
+
+        const numMatch = value.match(/(\d+)/);
+        const unitMatch = value.match(/([dmy])/i);
+        if (numMatch && unitMatch) {
+            const num = numMatch[1];
+            const unit = unitMatch[1].toLowerCase();
+            const prefixMatch = value.match(/^(\+{1,2})/);
+            const prefix = prefixMatch ? prefixMatch[1] : '';
+            return 'rec:' + prefix + num + unit;
+        }
+
+        const onlyNum = value.match(/^(\+{0,2})(\d+)$/);
+        if (onlyNum) return 'rec:' + onlyNum[1] + onlyNum[2] + 'd';
+        return '';
+    }
+
+    // === Parsing ===
+    function parseLines(t) {
+        return t ? t.split('\n').filter(x => x.trim()).map(parseLine) : [];
+    }
+
+    function parseLine(line) {
+        const t = {sub: "", desc: "", done: false};
+        let temp = line.trim();
+
+        if (temp.startsWith('x ')) {
+            t.done = true;
+            t.doneDate = temp.split(' ')[1];
+            temp = temp.split(' ').slice(2).join(' ');
+        }
+
+        if (temp.match(/^\([A-Z]\) /)) {
+            t.pri = temp.substring(0, 3);
+            temp = temp.substring(4);
+        }
+
+        const dm = temp.match(/^(\d{4}-\d{2}-\d{2}) /);
+        if (dm) {
+            t.created = dm[1];
+            temp = temp.substring(11);
+        }
+
+        const descM = temp.match(/desc:"((?:[^"\\]|\\.)*)"/);
+        if (descM) {
+            t.desc = descM[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\').replace(/\\n/g, '\n');
+            temp = temp.replace(descM[0], '').trim();
+        }
+
+        const subW = [];
+        temp.split(/\s+/).forEach(w => {
+            if (w.startsWith('due:')) t.due = w.slice(4);
+            else if (w.startsWith('rec:')) t.rec = w.slice(4);
+            else if (w.startsWith('id:')) t.legacyId = w.slice(3);
+            else if (w.startsWith('t:')) t.threshold = w.slice(2);
+            else if (w.startsWith('desc:') && !t.desc) t.desc = w.slice(5).replace(/\\n/g, '\n');
+            else subW.push(w);
+        });
+
+        t.sub = subW.join(' ');
+        return t;
+    }
+
+    function stringifyTask(t) {
+        const arr = [];
+        if (t.done) arr.push(`x ${t.doneDate}`);
+        if (t.pri) arr.push(t.pri);
+        if (t.created) arr.push(t.created);
+        arr.push(t.sub);
+        if (t.due) arr.push(`due:${t.due}`);
+        if (t.threshold) arr.push(`t:${t.threshold}`);
+        if (t.rec) arr.push(`rec:${t.rec}`);
+        if (config.show_id === true || config.show_id === "true") {
+            if (t.legacyId) arr.push(`id:${t.legacyId}`);
+        }
+        if (t.desc) arr.push(`desc:"${t.desc.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`);
+        return arr.join(' ');
+    }
+
+    function initPriSelect() {
+        const sel = DOM['inp-pri'];
+        let html = '<option value="">-</option>';
+        for (let i = 65; i <= 90; i++) {
+            const c = String.fromCharCode(i);
+            html += `<option value="(${c})">${c}</option>`;
+        }
+        sel.innerHTML = html;
+    }
+
+    function initDefaultPriSelect() {
+        const sel = DOM['cfg-default-priority'];
+        let html = '<option value="">-</option>';
+        for (let i = 65; i <= 90; i++) {
+            const c = String.fromCharCode(i);
+            html += `<option value="(${c})">${c}</option>`;
+        }
+        sel.innerHTML = html;
+    }
+
+    function getEffectivePriority(t) {
+        return t.pri || config.default_priority;
+    }
+
+    // === Initialization ===
+    async function init() {
+        currentLang = detectLanguage();
+        await loadLanguageResources(currentLang);
+        initDOMCache();
+        initPriSelect();
+        initDefaultPriSelect();
+        initSortMenuUI();
+        initEventDelegation();
+        await loadConfig();
+        await loadData();
+
+        window.onscroll = () => {
+            DOM['back-top'].style.display = window.scrollY > 300 ? 'flex' : 'none';
+        };
+        updateUI();
+    }
+
+    // === Public API ===
+    return {
+        // Lifecycle
+        init, updateUI, render, sync, saveConfig,
+        // Data
+        loadData, loadConfig,
+        // UI
+        applyTheme, applyMainWidth, applyOpacity, applyDoneOpacity, toggleSettingsModal, closeEditModal,
+        // Task operations
+        openEditModal, saveTask, saveTaskAndKeepOpen, deleteTask, deleteTaskFromEdit, completeTask, uncompleteTask,
+        // Filters
+        toggleDoneSection, clearFilter, appendFilter, toggleShowHidden, toggleTodayFilter,
+        // Today tasks
+        toggleTodayTaskInModal, toggleTaskToday,
+        // Input
+        resizeTitleInput, resizeDescInput, insertDateToDesc, insertRepeatSeparator, insertRepeatSeparatorBoth, renumberNumberedItems,
+        // Sort
+        toggleSortMenu, updateSort, updateDoneSort, initSortMenuUI, initDoneSortMenuUI,
+        // Tags
+        openTagMenu, openContextMenu, openProjectMenu, appendTagToInput, toggleSavedFilters, removeFilter, saveCurrentFilter, applyFilter, appendFilterToInput,
+        toggleProjectChildren, toggleAllProjectChildren,
+        // Project View
+        openProjectView, closeProjectView, toggleProjectViewChildren, toggleProjectViewTaskGroup, toggleProjectViewDesc, toggleProjectViewDescriptions, toggleAllProjectViewNodes, jumpToTask,
+        // Desc
+        toggleDesc,
+        // Tab
+        switchTab
+    };
+})();
+
+// Initialize on load
+window.onload = App.init;
+</script>
+</body>
+</html>
