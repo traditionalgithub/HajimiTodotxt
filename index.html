@@ -1131,7 +1131,7 @@ const App = (function() {
                 <div class="pv-project-header" onclick="App.toggleProjectViewChildren('pv-no-project')">
                     <span class="pv-toggle" onclick="event.stopPropagation();App.toggleProjectViewChildren('pv-no-project')">▶</span>
                     <span class="pv-project-name" style="color:var(--text-color)">${getLang('noProject', '未分類')}</span>
-                    <span class="pv-count">(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)/(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)</span>
+                    <span class="pv-count">${getLang('pvDirect', 'direct')}(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)/${getLang('pvRecursive', 'incl. sub')}(<b>${sortedNoProject.length - npU}</b>/<b>${sortedNoProject.length}</b>)</span>
                 </div>
                 <div class="pv-children" id="pv-no-project" style="display:none">`;
             if (sortedNoProject.length >= 3) {
@@ -1195,7 +1195,7 @@ const App = (function() {
                 <div class="pv-project-header" onclick="App.toggleProjectViewChildren('pv-${safeId}')">
                     <span class="pv-toggle" onclick="event.stopPropagation();App.toggleProjectViewChildren('pv-${safeId}')">${expanded ? '▼' : '▶'}</span>
                     <span class="pv-project-name" onclick="event.stopPropagation();App.toggleProjectViewDescriptions(event, 'pv-${safeId}')">+${fullPath}</span>
-                    <span class="pv-count">(<b>${dt - du}</b>/<b>${dt}</b>)/(<b>${all.total - all.unfinished}</b>/<b>${all.total}</b>)</span>
+                    <span class="pv-count">${getLang('pvDirect', 'direct')}(<b>${dt - du}</b>/<b>${dt}</b>)/${getLang('pvRecursive', 'incl. sub')}(<b>${all.total - all.unfinished}</b>/<b>${all.total}</b>)</span>
                 </div>
                 <div class="pv-children" id="pv-${safeId}" style="display:${expanded ? 'block' : 'none'}">`;
             if (tasks.length >= 3) {

@@ -100,6 +100,8 @@
   "noProject": "未分類",
   "tasks": "任務",
   "noTasks": "尚無任務",
+  "pvDirect": "不含子項目",
+  "pvRecursive": "含子項目",
   "sortMenu": {
     "title": "排序優先級",
     "position": "第",
