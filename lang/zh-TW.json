@@ -35,6 +35,8 @@
   "filterInputEmpty": "過濾欄是空的",
   "nameFilter": "請為此過濾器命名:",
   "doneSection": "📦 已完成",
+  "completeCelebration": "🎉 任務完成！",
+  "completeCelebrationHint": "點擊任意處關閉",
   "projectViewTitle": "📋 專案概覽",
   "doneSectionItems": "項",
   "expand": "展開...",

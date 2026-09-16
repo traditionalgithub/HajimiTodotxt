@@ -35,6 +35,8 @@
   "filterInputEmpty": "Filter input is empty",
   "nameFilter": "Please name this filter:",
   "doneSection": "📦 Completed",
+  "completeCelebration": "🎉 Task Done!",
+  "completeCelebrationHint": "Click anywhere to dismiss",
   "projectViewTitle": "📋 Project Overview",
   "doneSectionItems": "items",
   "expand": "Expand...",

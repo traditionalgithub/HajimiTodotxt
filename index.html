@@ -248,6 +248,22 @@
 
         /* === Animations === */
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* === Complete Celebration (zero-dependency) === */
+        #complete-celebration { display: none; position: fixed; inset: 0; z-index: 5000; align-items: center; justify-content: center; pointer-events: none; }
+        #complete-celebration.show { display: flex; }
+        .celebration-card { pointer-events: auto; cursor: pointer; text-align: center; background: var(--card-bg); color: var(--text-color); border: 3px solid var(--success); border-radius: 16px; padding: 24px 36px; max-width: 88vw; box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: celebratePop 0.35s ease-out; }
+        .celebration-emoji { font-size: 3em; line-height: 1; animation: celebrateBounce 0.6s ease infinite alternate; }
+        .celebration-text { font-size: 1.5em; font-weight: bold; color: var(--success); margin-top: 8px; }
+        .celebration-sub { font-size: 0.9em; opacity: 0.85; margin-top: 6px; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .celebration-hint { font-size: 0.75em; opacity: 0.6; margin-top: 10px; }
+        .confetti-piece { position: fixed; top: -16px; width: 8px; height: 14px; z-index: 5001; pointer-events: none; border-radius: 2px; animation: confettiFall linear forwards; }
+        @keyframes celebratePop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+        @keyframes celebrateBounce { from { transform: translateY(0) scale(1); } to { transform: translateY(-8px) scale(1.1); } }
+        @keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); opacity: 0.9; } }
+        @media (prefers-reduced-motion: reduce) {
+            .celebration-card, .celebration-emoji, .confetti-piece { animation: none; }
+        }
     </style>
 </head>
 <body>
@@ -473,6 +489,14 @@
 
 <!-- Floating Menus -->
 <div id="tag-menu" class="float-menu"></div>
+<div id="complete-celebration" onclick="App.dismissCelebration()">
+    <div class="celebration-card">
+        <div class="celebration-emoji">🎉</div>
+        <div class="celebration-text" id="celebration-text">🎉 任務完成！</div>
+        <div class="celebration-sub" id="celebration-sub"></div>
+        <div class="celebration-hint" id="celebration-hint">點擊任意處關閉</div>
+    </div>
+</div>
 <div id="filter-menu" class="float-menu"></div>
 <div id="sort-menu" class="float-menu wide">
     <div class="menu-header" id="sort-menu-title">排序優先級</div>
@@ -552,7 +576,8 @@ const App = (function() {
             'done-sort-options-container', 'done-sort-menu-title',
             'tab-content-properties', 'tab-content-description', 'tab-properties', 'tab-description',
             'save-task-btn', 'save-task-keep-open-btn', 'btn-delete-task', 'sort-menu-title', 'done-date-row',
-            'project-view-modal', 'project-view-content'
+            'project-view-modal', 'project-view-content',
+            'complete-celebration', 'celebration-text', 'celebration-sub', 'celebration-hint'
         ];
         ids.forEach(id => DOM[id] = document.getElementById(id));
     }
@@ -1440,6 +1465,7 @@ const App = (function() {
     function completeTask(index) {
         const t = tasks[index];
         if (!t) return;
+        const doneTitle = (t.sub || '').replace(/@☀️\.\d{8}/g, '').trim();
         t.done = true;
         t.doneDate = todayStr();
         const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
@@ -1451,6 +1477,7 @@ const App = (function() {
         tasks.splice(index, 1);
         render();
         sync();
+        celebrateCompletion(doneTitle);
     }
 
     function uncompleteTask(index) {
@@ -1462,6 +1489,52 @@ const App = (function() {
         doneTasks.splice(index, 1);
         render();
         sync();
+    }
+
+    // === Complete Celebration (zero-dependency: pure CSS + DOM) ===
+    let celebrateTimer = null;
+
+    function celebrateCompletion(title = '') {
+        const overlay = DOM['complete-celebration'] || document.getElementById('complete-celebration');
+        if (!overlay) return;
+        const textEl = DOM['celebration-text'] || document.getElementById('celebration-text');
+        const subEl = DOM['celebration-sub'] || document.getElementById('celebration-sub');
+        const hintEl = DOM['celebration-hint'] || document.getElementById('celebration-hint');
+        if (textEl) textEl.textContent = getLang('completeCelebration', '🎉 任務完成！');
+        if (subEl) {
+            const short = title.length > 40 ? title.slice(0, 40) + '…' : title;
+            subEl.textContent = short;
+            subEl.style.display = short ? 'block' : 'none';
+        }
+        if (hintEl) hintEl.textContent = getLang('completeCelebrationHint', '點擊任意處關閉');
+        overlay.classList.add('show');
+        spawnConfetti();
+        if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
+        if (celebrateTimer) clearTimeout(celebrateTimer);
+        celebrateTimer = setTimeout(dismissCelebration, 2200);
+    }
+
+    function spawnConfetti() {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const colors = ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#2196f3', '#9c27b0', '#ff69b4'];
+        for (let i = 0; i < 48; i++) {
+            const p = document.createElement('div');
+            p.className = 'confetti-piece';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.background = colors[i % colors.length];
+            p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+            p.style.animationDelay = (Math.random() * 0.35) + 's';
+            p.style.transform = `rotate(${Math.random() * 360}deg)`;
+            if (Math.random() > 0.5) p.style.borderRadius = '50%';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 3600);
+        }
+    }
+
+    function dismissCelebration() {
+        const overlay = DOM['complete-celebration'] || document.getElementById('complete-celebration');
+        if (overlay) overlay.classList.remove('show');
+        if (celebrateTimer) { clearTimeout(celebrateTimer); celebrateTimer = null; }
     }
 
     function deleteTask(index, isDone) {
@@ -2377,6 +2450,7 @@ const App = (function() {
         applyTheme, applyMainWidth, applyOpacity, applyDoneOpacity, toggleSettingsModal, closeEditModal,
         // Task operations
         openEditModal, saveTask, saveTaskAndKeepOpen, deleteTask, deleteTaskFromEdit, completeTask, uncompleteTask,
+        celebrateCompletion, dismissCelebration,
         // Filters
         toggleDoneSection, clearFilter, appendFilter, toggleShowHidden, toggleTodayFilter,
         // Today tasks

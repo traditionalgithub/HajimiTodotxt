@@ -1,3 +1,4 @@
+x 2026-09-16 (D) 2026-08-07 Learn to bake sourdough +Personal.Learning @Home due:2026-08-30 desc:"1. Follow the starter recipe\n2. https://www.bakingclub.net/ has great tutorials!\n"
 x 2026-08-09 (A) 2026-08-05 Deep clean the kitchen +Household.Cleaning @Home due:2026-08-09 desc:"All counters and appliances scrubbed"
 x 2026-08-08 (B) 2026-08-03 Fix leaky bathroom tap +Household.Repairs @Home due:2026-08-08 desc:"Washer replaced, no more drips"
 x 2026-08-07 (A) 2026-08-01 Complete home inventory +Personal @Home due:2026-08-07 desc:"All valuables documented"

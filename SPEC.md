@@ -206,7 +206,8 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 
 | 函數 | 功能 |
 |------|------|
-| `completeTask(index)` | 完成任務，移至 done.txt |
+| `completeTask(index)` | 完成任務，移至 done.txt（含零依賴醒目慶祝提示：彈層 + 五彩紙屑 + 震動） |
+| `celebrateCompletion(title)` / `dismissCelebration()` | 顯示 / 關閉完成慶祝彈層（純 CSS + DOM，2.2s 自動關閉，支援 `prefers-reduced-motion`） |
 | `uncompleteTask(index)` | 取消完成，移回 todo.txt |
 | `deleteTask(index, isDone)` | 刪除任務 |
 | `toggleTaskToday(index)` | 切換今日任務標記 |
@@ -289,6 +290,7 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 | Edit Modal | 任務編輯對話框 |
 | Settings Modal | 設定對話框（含點擊欄位行為切換） |
 | Project View Modal | 專案概覽視窗（階層式樹狀，含進度計數 / 一鍵跳轉 / 多行描述展開收合） |
+| Complete Celebration Overlay | 完成任務醒目提示（全螢幕彈層 + 五彩紙屑，零依賴，自動關閉 / 點擊關閉） |
 | Floating Menu | 浮動選單 (專案/標籤/排序) |
 
 ### 7.3 圖示含義
@@ -412,6 +414,7 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 | v8.1 | 2026-05-30 | 新增專案概覽模式（📋 按鈕 → 階層樹狀專案視圖，含進度計數 / 一鍵跳轉 / 描述展開收合） |
 | v8.2 | 2026-05-30 | 手機端 UI 優化：縮減 Header 按鈕間距；過濾時標題顯示未完成數量，已完成區顯示已完成/總數 |
 | v8.3 | 2026-07-24 | 新增預設優先級設定；點擊任務名稱新增 +/@ 至過濾欄；新增預設展開專案設定；項目檢視器 3+ 任務自動群組化；設定畫面點擊遮罩關閉 |
+| v8.4 | 2026-09-16 | 完成任務醒目提示：零依賴慶祝彈層（任務標題 + 五彩紙屑 + 行動端震動，2.2s 自動關閉），新增 `completeCelebration` / `completeCelebrationHint` 中英 i18n |
 
 ---
 
