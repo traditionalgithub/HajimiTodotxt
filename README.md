@@ -230,5 +230,5 @@ Sync these files:
 
 ---
 
-**License:** [Blue Oak Model License 1.0.0](https://blueoakcouncil.org/license/1.0.0)
+**License:** [Apache License, Version 2.0]([https://blueoakcouncil.org/license/1.0.0](https://www.apache.org/licenses/LICENSE-2.0))
 **Last Updated:** 2026-08-10
