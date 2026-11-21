@@ -11,5 +11,4 @@
 (A) 2026-08-10 Fix leaky kitchen faucet +Household.Urgent @Home due:2026-08-10 t:2026-08-10 desc:"1. Washer needs replacement\n2. WATER EVERYWHERE"
 (B) 2026-08-09 Plan family vacation +Family.Travel @Home due:2026-08-18 desc:"Coordinate with spouse on dates and budget"
 (C) 2026-08-08 Renew gym membership +Health @Phone due:2026-08-22 rec:+14d desc:"Check for new member deals"
-(D) 2026-08-07 Learn to bake sourdough +Personal.Learning @Home due:2026-08-30 desc:"1. Follow the starter recipe\n2. https://www.bakingclub.net/ has great tutorials!\n"
-(F) 2026-08-10 take a nap @Home desc:"take short sleep\\nap"
+(F) 2026-08-10 take a nap @Home desc:"take short sleep\nap"

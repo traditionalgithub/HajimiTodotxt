@@ -201,12 +201,15 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 | `sync()` | 同步資料到伺服器 |
 | `parseLines()` | 解析文字為任務物件 |
 | `stringifyTask()` | 序列化任務為文字 |
+| `renderSubjectHtml()` / `renderDescHtml()` | 渲染標題/描述，並將其中的日期標記為未來/今日/過去三色 |
+| `initDatePopover()` | 初始化日期懸停/游標停駐的快速修改氣泡 |
 
 ### 6.2 任務操作
 
 | 函數 | 功能 |
 |------|------|
 | `completeTask(index)` | 完成任務，移至 done.txt（含零依賴醒目慶祝提示：彈層 + 五彩紙屑 + 震動） |
+| `saveTaskAndComplete()` | 儲存編輯內容後立即完成任務（方便重複任務往復操作） |
 | `celebrateCompletion(title)` / `dismissCelebration()` | 顯示 / 關閉完成慶祝彈層（純 CSS + DOM，2.2s 自動關閉，支援 `prefers-reduced-motion`） |
 | `uncompleteTask(index)` | 取消完成，移回 todo.txt |
 | `deleteTask(index, isDone)` | 刪除任務 |
@@ -252,6 +255,17 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 - `twilight` - 暮光紫
 - `cocoa` - 可可棕
 
+### 6.5 日期識別與快速修改
+
+- 識別任務標題與描述中的 `[YYYY-MM-DD]`、`[YYYY-MM-DD HH:MM]`，容忍 `[]` 內多餘空格；亦支援 `YYYY-MM-DD` 裸日期、`/`/`.` 分隔與 `T` 時間分隔
+- 依裝置本地日期分三色：未來（success）、今日（accent）、過去（danger）
+- 滑鼠懸停日期、或編輯器游標停駐於日期時，於日期上方浮現「改為今天」「改為現在的時間」「指定日期…」操作
+- 編輯視窗的標題與描述輸入框也以背景覆蓋層同步顯示三色日期，輸入時即時更新，且不影響游標、選取與存檔內容
+- 「指定日期…」使用與截止日／隱藏日至相同的原生日期選擇器；指定後保留原本時刻（若有）
+- 編輯視窗中的截止日、隱藏至、完成日欄位同樣依未來／今日／過去顯示三色
+- 「改為今天」輸出純日期；「改為現在的時間」輸出本地日期 + `HH:MM`；保留原本是否帶 `[]`
+- 「插入現在時間」與明日日期計算一律使用裝置本地時區（修正原先 `toISOString()` 在凌晨造成 UTC 跨日的問題）
+
 ---
 
 ## 7. 使用者介面設計
@@ -292,6 +306,7 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 | Project View Modal | 專案概覽視窗（階層式樹狀，含進度計數 / 一鍵跳轉 / 多行描述展開收合） |
 | Complete Celebration Overlay | 完成任務醒目提示（全螢幕彈層 + 五彩紙屑，零依賴，自動關閉 / 點擊關閉） |
 | Floating Menu | 浮動選單 (專案/標籤/排序) |
+| Date Action Popover | 日期快速修改氣泡（改為今天 / 改為現在的時間） |
 
 ### 7.3 圖示含義
 
@@ -415,6 +430,7 @@ sort_keys=[{"key": "pri", "asc": true}, {"key": "due", "asc": true}]
 | v8.2 | 2026-05-30 | 手機端 UI 優化：縮減 Header 按鈕間距；過濾時標題顯示未完成數量，已完成區顯示已完成/總數 |
 | v8.3 | 2026-07-24 | 新增預設優先級設定；點擊任務名稱新增 +/@ 至過濾欄；新增預設展開專案設定；項目檢視器 3+ 任務自動群組化；設定畫面點擊遮罩關閉 |
 | v8.4 | 2026-09-16 | 完成任務醒目提示：零依賴慶祝彈層（任務標題 + 五彩紙屑 + 行動端震動，2.2s 自動關閉），新增 `completeCelebration` / `completeCelebrationHint` 中英 i18n |
+| v8.5 | 2026-11-21 | 標題/描述日期三色高亮與懸停/游標快速改期（改為今天 / 改為現在 / 指定日期）；編輯視窗日期欄位同步三色；新增「儲存並完成任務」按鈕；修正插入現在時間使用 UTC 導致的跨日錯誤 |
 
 ---
 

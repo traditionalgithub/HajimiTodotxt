@@ -164,6 +164,11 @@
         .hl-project-segment { color: var(--project-color); font-weight: bold; cursor: pointer; }
         .hl-project-segment:hover { text-decoration: underline; }
         .hl-context { color: var(--context-color); font-weight: bold; cursor: pointer; }
+        .hl-date { font-weight: 600; padding: 0 1px; border-radius: 3px; border-bottom: 1px dotted currentColor; cursor: pointer; }
+        .hl-date:hover { background: var(--tag-bg); }
+        .hl-date-future { color: var(--success); }
+        .hl-date-today { color: var(--accent); }
+        .hl-date-past { color: var(--danger); }
         .tag { font-size: 0.75em; padding: 1px 6px; border-radius: 4px; margin-right: 5px; background: var(--tag-bg); color: var(--tag-text); border: 1px solid var(--border); display: inline-block; vertical-align: middle; }
         .done-section { margin-top: 40px; opacity: 0.8; }
         .done-section h3 { border-bottom: 1px solid var(--border); cursor: pointer; font-size: 1em; }
@@ -192,8 +197,24 @@
         .form-group.flex-2 { flex: 2; }
         .form-group.flex-1 { flex: 1; }
         input, select, textarea { width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--border); color: var(--text-color); padding: 8px; border-radius: 6px; box-sizing: border-box; font-family: var(--font-mono); }
+        input[type="date"].date-field-future { color: var(--success); border-color: var(--success); font-weight: 600; }
+        input[type="date"].date-field-today { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+        input[type="date"].date-field-past { color: var(--danger); border-color: var(--danger); font-weight: 600; }
+        input[type="date"]::-webkit-datetime-edit { color: inherit; }
         textarea.title-input { font-size: 1.1em; font-weight: bold; height: 60px; resize: vertical; }
         textarea.desc-input { font-size: 1em; height: 100px; resize: vertical; }
+        /* Textarea with colored date tokens: a read-only backdrop sits behind a transparent textarea. */
+        .highlight-editor { position: relative; width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        .highlight-editor:focus-within { border-color: var(--accent); }
+        .highlight-editor > textarea { position: relative; z-index: 1; display: block; background: transparent; border: 0; border-radius: 0; caret-color: var(--text-color); }
+        .highlight-editor > textarea:focus { outline: none; }
+        .highlight-editor.ready > textarea { color: transparent; }
+        .highlight-editor > textarea::placeholder { color: #888; opacity: 1; }
+        .highlight-editor > textarea::selection { background: rgba(52,152,219,0.35); }
+        .highlight-backdrop { position: absolute; top: 0; left: 0; z-index: 0; overflow: hidden; pointer-events: none; user-select: none; box-sizing: border-box; padding: 8px; color: var(--text-color); font-family: var(--font-mono); white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; }
+        .highlight-backdrop .hl-date-future { color: var(--success); }
+        .highlight-backdrop .hl-date-today { color: var(--accent); }
+        .highlight-backdrop .hl-date-past { color: var(--danger); }
         textarea { scrollbar-width: thin; scrollbar-color: var(--accent) var(--border); }
         textarea::-webkit-scrollbar { width: 16px; }
         textarea::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; border: 2px solid var(--card-bg); }
@@ -219,6 +240,17 @@
         .menu-item:hover { background: rgba(0,0,0,0.05); }
         .menu-header { padding: 5px; border-bottom: 1px solid var(--border); font-weight: bold; color: var(--accent); }
         .menu-empty { padding: 10px; color: #888; font-size: 0.8em; }
+
+        /* === Date Action Popover === */
+        .date-action-popover { display: none; position: fixed; z-index: 4000; background: var(--card-bg); border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); padding: 4px; gap: 4px; align-items: center; }
+        .date-action-popover.show { display: flex; animation: fadeIn 0.1s; }
+        .date-action-popover button { font-size: 0.78em; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--tag-bg); color: var(--text-color); white-space: nowrap; }
+        .date-action-popover button:hover { background: var(--accent); color: var(--bg-color); transform: none; }
+        .date-action-row { display: flex; gap: 4px; align-items: center; }
+        .date-action-custom { display: none; gap: 4px; align-items: center; }
+        .date-action-popover.custom-mode .date-action-row { display: none; }
+        .date-action-popover.custom-mode .date-action-custom { display: flex; }
+        .date-action-popover input[type="date"] { width: auto; padding: 3px 5px; font-size: 0.78em; }
 
         /* === Back to Top === */
         #back-top { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: var(--accent); color: var(--bg-color); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 1.5em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 900; opacity: 0.8; }
@@ -315,7 +347,10 @@
 
         <div class="tab-content active" id="tab-content-properties">
             <div class="form-row">
-                <textarea id="inp-sub" class="title-input" placeholder="任務標題 (可多行，存檔自動轉單行)"></textarea>
+                <div class="highlight-editor" id="inp-sub-wrap">
+                    <div class="highlight-backdrop" id="inp-sub-highlight" aria-hidden="true"></div>
+                    <textarea id="inp-sub" class="title-input" placeholder="任務標題 (可多行，存檔自動轉單行)"></textarea>
+                </div>
             </div>
             <div class="form-row btn-group">
                 <span class="text-gray" id="label-title-size">標題大小:</span>
@@ -360,7 +395,10 @@
 
         <div class="tab-content" id="tab-content-description">
             <div class="form-row">
-                <textarea id="inp-desc" class="desc-input" placeholder="詳細描述 (支援多行，會被保存為 desc:&quot;...&quot;)"></textarea>
+                <div class="highlight-editor" id="inp-desc-wrap">
+                    <div class="highlight-backdrop" id="inp-desc-highlight" aria-hidden="true"></div>
+                    <textarea id="inp-desc" class="desc-input" placeholder="詳細描述 (支援多行，會被保存為 desc:&quot;...&quot;)"></textarea>
+                </div>
             </div>
             <div class="form-row btn-group">
                 <button class="small-btn" onclick="App.insertDateToDesc()" id="btn-insert-time" title="插入現在時間">插入現在時間</button>
@@ -377,6 +415,7 @@
         <div class="form-actions">
             <button onclick="App.saveTaskAndKeepOpen()" id="save-task-keep-open-btn">保存並繼續</button>
             <button onclick="App.saveTask()" id="save-task-btn">保存任務</button>
+            <button onclick="App.saveTaskAndComplete()" id="save-complete-btn" style="background: var(--success); color: var(--bg-color);">儲存並完成任務</button>
             <button onclick="App.deleteTaskFromEdit()" id="btn-delete-task" style="background: var(--danger); color: var(--bg-color);">刪除任務</button>
         </div>
     </div>
@@ -488,6 +527,17 @@
 </div>
 
 <!-- Floating Menus -->
+<div id="date-action-popover" class="date-action-popover">
+    <div class="date-action-row">
+        <button type="button" data-date-action="today">改為今天</button>
+        <button type="button" data-date-action="now">改為現在的時間</button>
+        <button type="button" data-date-action="custom">指定日期…</button>
+    </div>
+    <div class="date-action-custom">
+        <input type="date" id="date-action-picker">
+    </div>
+</div>
+
 <div id="tag-menu" class="float-menu"></div>
 <div id="complete-celebration" onclick="App.dismissCelebration()">
     <div class="celebration-card">
@@ -512,7 +562,7 @@ const App = (function() {
     'use strict';
 
     // === Constants ===
-    const APP_VERSION = '7.2.2.1.5.0';
+    const APP_VERSION = '7.2.2.1.7.0';
     const REPEAT_SEPARATOR = '---REPEAT-ABOVE---';
     const REPEAT_SEPARATOR_BOTH = '---REPEAT-COPY---';
 
@@ -534,6 +584,10 @@ const App = (function() {
     let showHiddenTasks = false;
     let showTodayTasks = false;
     let currentLang = 'zh-TW';
+    let datePopoverState = null;
+    let datePopoverHideTimer = null;
+    let datePopoverAnchor = null;
+    let suppressTextareaPopover = false;
 
     // === DOM Cache ===
     const DOM = {};
@@ -547,6 +601,181 @@ const App = (function() {
         const d = date.getDate().toString().padStart(2, '0');
         return `${y}-${m}-${d}`;
     };
+
+    const pad2 = (n) => n.toString().padStart(2, '0');
+
+    // Date token: optional [ ], YYYY-MM-DD (or / .), optional time.
+    // Tolerates extra spaces inside brackets and accepts "T" or a space before the time.
+    const DATE_TOKEN_SOURCE = '\\[\\s*(\\d{4})[-/.](\\d{1,2})[-/.](\\d{1,2})(?:[ T](\\d{1,2}):(\\d{2})(?::(\\d{2}))?)?\\s*\\]|\\b(\\d{4})-(\\d{1,2})-(\\d{1,2})(?:[ T](\\d{1,2}):(\\d{2})(?::(\\d{2}))?)?\\b';
+    const dateTokenRegex = () => new RegExp(DATE_TOKEN_SOURCE, 'g');
+
+    function parseDateToken(raw) {
+        const bracket = raw.match(/^\[\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?\s*\]$/);
+        const bare = bracket ? null : raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+        const m = bracket || bare;
+        if (!m) return null;
+
+        const y = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        const d = parseInt(m[3], 10);
+        const hasTime = m[4] !== undefined;
+        const h = hasTime ? parseInt(m[4], 10) : null;
+        const mi = hasTime ? parseInt(m[5], 10) : null;
+
+        if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+        if (hasTime && (h > 23 || mi > 59)) return null;
+
+        return {
+            date: `${y}-${pad2(mo)}-${pad2(d)}`,
+            hasTime,
+            bracketed: !!bracket,
+            hour: h,
+            minute: mi,
+            timeText: hasTime ? `${pad2(h)}:${m[5]}${m[6] !== undefined ? ':' + m[6] : ''}` : null
+        };
+    }
+
+    function dateTokenClass(info) {
+        const today = todayStr();
+        if (info.date > today) return 'future';
+        if (info.date < today) return 'past';
+        return 'today';
+    }
+
+    function formatDateReplacement(raw, mode, customDate) {
+        const info = parseDateToken(raw);
+        if (!info) return raw;
+        let value;
+        if (mode === 'custom') {
+            if (!customDate || !/^\d{4}-\d{2}-\d{2}$/.test(customDate)) return raw;
+            value = customDate + (info.hasTime ? ` ${info.timeText}` : '');
+        } else if (mode === 'now') {
+            const now = new Date();
+            value = `${todayStr(now)} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+        } else {
+            value = todayStr();
+        }
+        return info.bracketed ? `[${value}]` : value;
+    }
+
+    function replaceNthDateToken(text, nth, mode, customDate) {
+        if (typeof text !== 'string') return null;
+        const re = dateTokenRegex();
+        let i = 0, m;
+        while ((m = re.exec(text)) !== null) {
+            if (i++ !== nth) continue;
+            return text.slice(0, m.index) + formatDateReplacement(m[0], mode, customDate) + text.slice(re.lastIndex);
+        }
+        return null;
+    }
+
+    function buildDateSpan(raw, meta, nth) {
+        const info = parseDateToken(raw);
+        if (!info) return escapeHtml(raw);
+        const cls = dateTokenClass(info);
+        return `<span class="hl-date hl-date-${cls}" data-date-target="${meta.index}" data-date-done="${meta.isDone ? 1 : 0}" data-date-field="${meta.field}" data-date-nth="${nth}">${escapeHtml(raw)}</span>`;
+    }
+
+    function renderSubjectSegment(segment) {
+        return escapeHtml(segment)
+            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
+                const segments = tag.slice(1).split('.');
+                let cumulative = '';
+                const rendered = segments.map((seg, i) => {
+                    cumulative = cumulative ? cumulative + '.' + seg : seg;
+                    return `<span class="hl-project-segment" data-tag="+${cumulative}">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`;
+                }).join('.');
+                return space + rendered;
+            })
+            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
+    }
+
+    function renderSubjectHtml(rawText, meta) {
+        const text = (rawText || '').replace(/@☀️\.\d{8}\s*/g, '');
+        const re = dateTokenRegex();
+        let html = '', last = 0, nth = 0, m;
+        while ((m = re.exec(text)) !== null) {
+            html += renderSubjectSegment(text.slice(last, m.index));
+            html += buildDateSpan(m[0], meta, nth++);
+            last = re.lastIndex;
+        }
+        html += renderSubjectSegment(text.slice(last));
+        return html;
+    }
+
+    function renderDescHtml(rawText, meta) {
+        const text = rawText || '';
+        const re = dateTokenRegex();
+        let html = '', last = 0, nth = 0, m;
+        while ((m = re.exec(text)) !== null) {
+            html += escapeHtml(text.slice(last, m.index));
+            html += buildDateSpan(m[0], meta, nth++);
+            last = re.lastIndex;
+        }
+        html += escapeHtml(text.slice(last));
+        return html;
+    }
+
+    // === Editor Date Highlight ===
+    // A plain <textarea> cannot render per-word colors, so a read-only backdrop
+    // shows the same text with colored date tokens while the textarea keeps the
+    // real value and caret. The textarea text is transparent only after the
+    // backdrop is ready, so a failure never hides the user's input.
+    function buildDateHighlightHtml(rawText) {
+        const text = rawText || '';
+        const re = dateTokenRegex();
+        let html = '', last = 0, m;
+        while ((m = re.exec(text)) !== null) {
+            html += escapeHtml(text.slice(last, m.index));
+            const info = parseDateToken(m[0]);
+            if (info) {
+                html += `<span class="hl-date-${dateTokenClass(info)}">${escapeHtml(m[0])}</span>`;
+            } else {
+                html += escapeHtml(m[0]);
+            }
+            last = re.lastIndex;
+        }
+        html += escapeHtml(text.slice(last));
+        // Keep the empty last line when the value ends with a newline.
+        if (text.endsWith('\n')) html += '\u200b';
+        return html;
+    }
+
+    function syncHighlightEditor(el, updateText = true) {
+        if (!el) return;
+        const backdrop = document.getElementById(`${el.id}-highlight`);
+        if (!backdrop) return;
+        const cs = window.getComputedStyle(el);
+        [
+            'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight',
+            'textTransform', 'textIndent', 'whiteSpace', 'wordBreak', 'overflowWrap', 'tabSize',
+            'boxSizing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'
+        ].forEach(p => { backdrop.style[p] = cs[p]; });
+        backdrop.style.width = `${el.clientWidth}px`;
+        backdrop.style.height = `${el.clientHeight}px`;
+        if (updateText) backdrop.innerHTML = buildDateHighlightHtml(el.value);
+        backdrop.scrollTop = el.scrollTop;
+        backdrop.scrollLeft = el.scrollLeft;
+        if (backdrop.parentElement) backdrop.parentElement.classList.add('ready');
+    }
+
+    function initHighlightEditors() {
+        ['inp-sub', 'inp-desc'].forEach(id => {
+            const el = DOM[id];
+            if (!el) return;
+            el.addEventListener('input', () => syncHighlightEditor(el));
+            el.addEventListener('change', () => syncHighlightEditor(el));
+            el.addEventListener('compositionend', () => syncHighlightEditor(el));
+            el.addEventListener('scroll', () => syncHighlightEditor(el, false));
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(() => syncHighlightEditor(el, false)).observe(el);
+            }
+        });
+        window.addEventListener('resize', () => {
+            syncHighlightEditor(DOM['inp-sub'], false);
+            syncHighlightEditor(DOM['inp-desc'], false);
+        });
+    }
 
     const addCacheBusting = (url) => {
         const separator = url.includes('?') ? '&' : '?';
@@ -575,9 +804,10 @@ const App = (function() {
             'done-section-title', 'done-section-count', 'page-title', 'sort-options-container',
             'done-sort-options-container', 'done-sort-menu-title',
             'tab-content-properties', 'tab-content-description', 'tab-properties', 'tab-description',
-            'save-task-btn', 'save-task-keep-open-btn', 'btn-delete-task', 'sort-menu-title', 'done-date-row',
-            'project-view-modal', 'project-view-content',
-            'complete-celebration', 'celebration-text', 'celebration-sub', 'celebration-hint'
+            'save-task-btn', 'save-task-keep-open-btn', 'save-complete-btn', 'btn-delete-task', 'sort-menu-title', 'done-date-row',
+            'project-view-modal', 'project-view-content', 'project-view-title',
+            'complete-celebration', 'celebration-text', 'celebration-sub', 'celebration-hint',
+            'date-action-popover', 'date-action-picker'
         ];
         ids.forEach(id => DOM[id] = document.getElementById(id));
     }
@@ -614,10 +844,11 @@ const App = (function() {
             ['edit-modal-title', 'modalTitles.addTask', '新增任務'],
             ['settings-modal-title', 'settings', '⚙️ 設定'],
             ['sort-menu-title', 'sortMenu.title', '排序優先級'],
-            ['save-task-btn', 'modalTitles.saveTask', '保存任務'],
+            ['save-task-btn', 'saveTask', '保存任務'],
             ['save-task-keep-open-btn', 'saveTaskAndKeepOpen', '保存並繼續'],
+            ['save-complete-btn', 'saveTaskAndComplete', '儲存並完成任務'],
             ['project-view-title', 'projectViewTitle', '📋 專案概覽'],
-            ['btn-delete-task', 'modalTitles.deleteTask', '刪除任務']
+            ['btn-delete-task', 'deleteTask', '刪除任務']
         ];
 
         textUpdates.forEach(([id, key, fallback]) => {
@@ -629,7 +860,8 @@ const App = (function() {
         const placeholderUpdates = [
             ['filter-input', 'searchPlaceholder', '搜尋...'],
             ['inp-sub', 'taskTitlePlaceholder', '任務標題 (可多行，存檔自動轉單行)'],
-            ['inp-desc', 'taskDescriptionPlaceholder', '詳細描述 (支援多行，會被保存為 desc:"...")']
+            ['inp-desc', 'taskDescriptionPlaceholder', '詳細描述 (支援多行，會被保存為 desc:"...")'],
+            ['inp-rec', 'recurrencePlaceholder', '+1d (格式：+數字單位 d/m/y)']
         ];
 
         placeholderUpdates.forEach(([id, key, fallback]) => {
@@ -709,6 +941,17 @@ const App = (function() {
             const el = document.getElementById(id);
             if (el) el.textContent = getLang(key, fallback);
         });
+
+        // Update date action popover labels
+        const datePopover = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        if (datePopover) {
+            const todayBtn = datePopover.querySelector('[data-date-action="today"]');
+            if (todayBtn) todayBtn.textContent = getLang('dateChangeToToday', '改為今天');
+            const nowBtn = datePopover.querySelector('[data-date-action="now"]');
+            if (nowBtn) nowBtn.textContent = getLang('dateChangeToNow', '改為現在的時間');
+            const customBtn = datePopover.querySelector('[data-date-action="custom"]');
+            if (customBtn) customBtn.textContent = getLang('dateChangeToSpecific', '指定日期…');
+        }
 
         // Update opacity hint and sync info
         const opacityHintLabel = document.getElementById('opacity-hint-label');
@@ -843,7 +1086,7 @@ const App = (function() {
         const today = todayStr();
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomStr = tomorrow.toISOString().split('T')[0];
+        const tomStr = todayStr(tomorrow);
         const terms = filterText.split(/\s+/).filter(x => x);
         const hasSunFilter = terms.some(term => term.toLowerCase().includes('@☀️'));
 
@@ -1029,19 +1272,8 @@ const App = (function() {
         div.className = `task-item ${isDone ? 'done-item' : ''} ${isThreshold ? 'threshold-hidden' : ''}`;
         div.dataset.taskIndex = index;
 
-        // Process subject text
-        let niceSub = escapeHtml(t.sub)
-            .replace(/@☀️\.\d{8}\s*/g, '')
-            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
-                const segments = tag.slice(1).split('.');
-                let cumulative = '';
-                const rendered = segments.map((seg, i) => {
-                    cumulative = cumulative ? cumulative + '.' + seg : seg;
-                    return `<span class="hl-project-segment" data-tag="+${cumulative}">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`;
-                }).join('.');
-                return space + rendered;
-            })
-            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
+        // Process subject text (highlight projects/contexts and bracketed dates)
+        const niceSub = renderSubjectHtml(t.sub, { index, isDone, field: 'sub' });
 
         // Today task icon
         let todayIcon = '';
@@ -1087,7 +1319,7 @@ const App = (function() {
             ${t.desc ? `
                 <div class="task-desc-container">
                     <div class="desc-toggle" data-index="${index}" style="display:none">${getLang('expand', '展開...')}</div>
-                    <div class="task-desc-content" id="desc-${index}">${escapeHtml(t.desc)}</div>
+                    <div class="task-desc-content" id="desc-${index}">${renderDescHtml(t.desc, { index, isDone, field: 'desc' })}</div>
                 </div>` : ''}`;
 
         return div;
@@ -1244,18 +1476,7 @@ const App = (function() {
 
     function buildProjectViewItem(t, index, isDone) {
         const descId = pvDescCounter++;
-        let niceSub = escapeHtml(t.sub)
-            .replace(/@☀️\.\d{8}\s*/g, '')
-            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
-                const segments = tag.slice(1).split('.');
-                let cumulative = '';
-                const rendered = segments.map((seg, i) => {
-                    cumulative = cumulative ? `${cumulative}.${seg}` : seg;
-                    return `<span class="hl-project-segment" data-tag="+${cumulative}">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`;
-                }).join('.');
-                return space + rendered;
-            })
-            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
+        const niceSub = renderSubjectHtml(t.sub, { index, isDone, field: 'sub' });
         let todayIcon = '';
         const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
         if (todayMatch) {
@@ -1280,7 +1501,7 @@ const App = (function() {
         if (t.desc) {
             html += `<div class="task-desc-container" style="margin-top:4px;">
                 <div class="pv-desc-toggle" data-pv-desc-id="${descId}" onclick="App.toggleProjectViewDesc(${descId})" style="display:none">${getLang('expand', '展開...')}</div>
-                <div class="task-desc-content" id="pv-desc-${descId}">${escapeHtml(t.desc)}</div>
+                <div class="task-desc-content" id="pv-desc-${descId}">${renderDescHtml(t.desc, { index, isDone, field: 'desc' })}</div>
             </div>`;
         }
         html += `</div>
@@ -1403,6 +1624,12 @@ const App = (function() {
             if (taskItem) {
                 const taskIndex = parseInt(taskItem.dataset.taskIndex);
                 const isDone = taskItem.classList.contains('done-item');
+
+                // Date token: the date popover handles it; don't trigger the title filter
+                if (e.target.closest('.hl-date')) {
+                    showDatePopoverForSpan(e.target.closest('.hl-date'));
+                    return;
+                }
 
                 // Checkbox
                 if (e.target.matches('input[type="checkbox"][data-action]')) {
@@ -1569,7 +1796,25 @@ const App = (function() {
         }
     }
 
-    function saveTaskData() {
+    function saveTaskAndComplete() {
+        const index = editingIndex;
+        const isDone = editingIsDone;
+        const result = saveTaskData({ skipSync: true });
+        if (!result) return;
+
+        closeEditModal();
+        if (index === null) {
+            // Newly created task is appended at the end.
+            completeTask(tasks.length - 1);
+        } else if (!isDone) {
+            completeTask(index);
+        } else {
+            // Already completed; saving is enough.
+            sync();
+        }
+    }
+
+    function saveTaskData(options = {}) {
         const sub = DOM['inp-sub'].value.replace(/\n/g, ' ').trim();
         if (!sub) {
             alert(getLang('titleRequired', '請輸入標題'));
@@ -1583,6 +1828,7 @@ const App = (function() {
             alert(getLang('thresholdAfterDue', '隱藏期晚於截止期，已自動修正為截止期同一天'));
             thresholdDate = dueDate;
             DOM['inp-t'].value = thresholdDate;
+            updateDateFieldColors();
         }
 
         const recValue = normalizeRecurrence(DOM['inp-rec'].value);
@@ -1612,7 +1858,7 @@ const App = (function() {
         }
 
         render();
-        sync();
+        if (!options.skipSync) sync();
         return true;
     }
 
@@ -1646,11 +1892,17 @@ const App = (function() {
             DOM['inp-done-date'].value = '';
         }
 
+        updateDateFieldColors();
         switchTab('properties');
         DOM['edit-modal'].classList.add('show');
+        requestAnimationFrame(() => {
+            syncHighlightEditor(DOM['inp-sub']);
+            syncHighlightEditor(DOM['inp-desc']);
+        });
     }
 
     function closeEditModal() {
+        hideDatePopover();
         DOM['edit-modal'].classList.remove('show');
         editingIndex = null;
         editingIsDone = false;
@@ -1679,10 +1931,15 @@ const App = (function() {
     }
 
     function switchTab(tabName) {
+        hideDatePopover();
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
         DOM[`tab-content-${tabName}`].classList.add('active');
+        requestAnimationFrame(() => {
+            syncHighlightEditor(DOM['inp-sub'], tabName === 'properties');
+            syncHighlightEditor(DOM['inp-desc'], tabName === 'description');
+        });
     }
 
     // === Filter & Sort ===
@@ -1742,6 +1999,7 @@ const App = (function() {
         } else {
             inpSub.value = (currentSub + ' @☀️.' + todayYYYYMMDD).trim();
         }
+        syncHighlightEditor(inpSub);
     }
 
     function toggleTaskToday(index) {
@@ -2137,6 +2395,311 @@ const App = (function() {
         }
     }
 
+    // === Date Action Popover ===
+    function updateDateFieldColors() {
+        const today = todayStr();
+        ['inp-due', 'inp-t', 'inp-done-date'].forEach(id => {
+            const el = DOM[id];
+            if (!el) return;
+            el.classList.remove('date-field-future', 'date-field-today', 'date-field-past');
+            if (!el.value) return;
+            const cls = el.value > today ? 'future' : (el.value < today ? 'past' : 'today');
+            el.classList.add(`date-field-${cls}`);
+        });
+    }
+
+    function resetDatePopoverCustomMode() {
+        const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        if (pop) pop.classList.remove('custom-mode');
+        const picker = DOM['date-action-picker'] || document.getElementById('date-action-picker');
+        if (picker) picker.value = '';
+    }
+
+    function openDateActionPicker() {
+        const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        const picker = DOM['date-action-picker'] || document.getElementById('date-action-picker');
+        if (!pop || !picker || !datePopoverState) return;
+
+        const info = parseDateToken(datePopoverState.raw || '');
+        pop.classList.add('custom-mode');
+        picker.value = info ? info.date : '';
+        if (datePopoverAnchor) {
+            showDatePopoverAt(datePopoverAnchor.left, datePopoverAnchor.top, datePopoverAnchor.height);
+        }
+        picker.focus();
+        if (typeof picker.showPicker === 'function') {
+            try { picker.showPicker(); } catch (e) { /* fall back to the visible picker */ }
+        }
+    }
+
+    function showDatePopoverAt(left, top, height) {
+        const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        if (!pop) return;
+        datePopoverAnchor = { left, top, height };
+        pop.classList.add('show');
+        const pw = pop.offsetWidth;
+        const ph = pop.offsetHeight;
+        let x = left;
+        let y = top - ph - 6;
+        if (y < 4) y = top + (height || 0) + 6;
+        x = Math.max(6, Math.min(x, window.innerWidth - pw - 6));
+        y = Math.max(4, Math.min(y, window.innerHeight - ph - 4));
+        pop.style.left = `${x}px`;
+        pop.style.top = `${y}px`;
+    }
+
+    function showDatePopoverForSpan(el) {
+        if (!el) return;
+        const index = parseInt(el.dataset.dateTarget, 10);
+        const nth = parseInt(el.dataset.dateNth, 10);
+        if (isNaN(index) || isNaN(nth)) return;
+        if (datePopoverHideTimer) {
+            clearTimeout(datePopoverHideTimer);
+            datePopoverHideTimer = null;
+        }
+        resetDatePopoverCustomMode();
+        datePopoverState = {
+            mode: 'render',
+            raw: el.textContent,
+            meta: {
+                index,
+                isDone: el.dataset.dateDone === '1',
+                field: el.dataset.dateField,
+                nth
+            }
+        };
+        const r = el.getBoundingClientRect();
+        showDatePopoverAt(r.left, r.top, r.height);
+    }
+
+    function hideDatePopover() {
+        const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        if (pop) pop.classList.remove('show');
+        resetDatePopoverCustomMode();
+        datePopoverState = null;
+        datePopoverAnchor = null;
+        if (datePopoverHideTimer) {
+            clearTimeout(datePopoverHideTimer);
+            datePopoverHideTimer = null;
+        }
+    }
+
+    function scheduleHideDatePopover() {
+        if (datePopoverHideTimer) clearTimeout(datePopoverHideTimer);
+        datePopoverHideTimer = setTimeout(() => {
+            const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+            if (pop && pop.contains(document.activeElement)) return;
+            hideDatePopover();
+        }, 180);
+    }
+
+    function findDateTokenAtCaret(el) {
+        if (!el || el.selectionStart === null || el.selectionStart !== el.selectionEnd) return null;
+        const pos = el.selectionStart;
+        const re = dateTokenRegex();
+        let m;
+        while ((m = re.exec(el.value)) !== null) {
+            const start = m.index;
+            const end = re.lastIndex;
+            if (pos >= start && pos <= end) return { start, end, raw: m[0] };
+        }
+        return null;
+    }
+
+    function getTextareaCaretRect(el, pos) {
+        const rect = el.getBoundingClientRect();
+        const cs = window.getComputedStyle(el);
+        const mirror = document.createElement('div');
+        const copyProps = [
+            'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight',
+            'textTransform', 'textIndent', 'whiteSpace', 'wordBreak', 'overflowWrap', 'tabSize',
+            'boxSizing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'
+        ];
+        copyProps.forEach(p => { mirror.style[p] = cs[p]; });
+
+        mirror.style.position = 'absolute';
+        mirror.style.left = '0';
+        mirror.style.top = '0';
+        mirror.style.width = `${el.clientWidth}px`;
+        mirror.style.height = 'auto';
+        mirror.style.visibility = 'hidden';
+        mirror.style.whiteSpace = 'pre-wrap';
+        mirror.style.wordWrap = 'break-word';
+        mirror.style.border = '0';
+        mirror.style.overflow = 'hidden';
+        mirror.textContent = el.value.substring(0, pos);
+
+        const marker = document.createElement('span');
+        marker.textContent = '\u200b';
+        mirror.appendChild(marker);
+        document.body.appendChild(mirror);
+
+        const mirrorRect = mirror.getBoundingClientRect();
+        const markerRect = marker.getBoundingClientRect();
+        document.body.removeChild(mirror);
+
+        const borderLeft = parseFloat(cs.borderLeftWidth) || 0;
+        const borderTop = parseFloat(cs.borderTopWidth) || 0;
+        return {
+            left: rect.left + borderLeft + (markerRect.left - mirrorRect.left) - el.scrollLeft,
+            top: rect.top + borderTop + (markerRect.top - mirrorRect.top) - el.scrollTop,
+            height: markerRect.height || parseFloat(cs.lineHeight) || 18
+        };
+    }
+
+    function updateDatePopoverForTextarea(el) {
+        if (suppressTextareaPopover) return;
+        if (!el || !el.offsetParent) return;
+        const found = findDateTokenAtCaret(el);
+        if (!found) {
+            if (datePopoverState && datePopoverState.mode === 'textarea') hideDatePopover();
+            return;
+        }
+        const caret = getTextareaCaretRect(el, el.selectionStart);
+        resetDatePopoverCustomMode();
+        datePopoverState = {
+            mode: 'textarea',
+            el,
+            raw: found.raw,
+            start: found.start,
+            end: found.end
+        };
+        showDatePopoverAt(caret.left, caret.top, caret.height);
+    }
+
+    function refreshAfterDateEdit() {
+        render();
+        const pv = DOM['project-view-modal'];
+        if (pv && pv.classList.contains('show')) {
+            const box = pv.querySelector('.modal-box');
+            const top = box ? box.scrollTop : 0;
+            openProjectView();
+            if (box) box.scrollTop = top;
+        }
+    }
+
+    function applyDatePopoverAction(action, customDate) {
+        if (!datePopoverState) return;
+
+        if (datePopoverState.mode === 'render') {
+            const meta = datePopoverState.meta;
+            const list = meta.isDone ? doneTasks : tasks;
+            const task = list[meta.index];
+            if (!task) {
+                hideDatePopover();
+                return;
+            }
+            const updated = replaceNthDateToken(task[meta.field] || '', meta.nth, action, customDate);
+            hideDatePopover();
+            if (updated === null) return;
+            task[meta.field] = updated;
+            sync();
+            refreshAfterDateEdit();
+        } else if (datePopoverState.mode === 'textarea') {
+            const { el, start, end, raw } = datePopoverState;
+            const replacement = formatDateReplacement(raw, action, customDate);
+            hideDatePopover();
+            if (!el || replacement === raw) return;
+            el.value = el.value.slice(0, start) + replacement + el.value.slice(end);
+            const caret = start + replacement.length;
+            suppressTextareaPopover = true;
+            el.focus();
+            el.setSelectionRange(caret, caret);
+            syncHighlightEditor(el);
+            hideDatePopover();
+            setTimeout(() => { suppressTextareaPopover = false; }, 0);
+        }
+    }
+
+    function initDatePopover() {
+        const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
+        if (!pop) return;
+
+        pop.addEventListener('mousedown', (e) => {
+            // Keep textarea focus when pressing a popover button, but allow the date input to focus.
+            if (e.target.closest('button')) e.preventDefault();
+        });
+        pop.addEventListener('mouseenter', () => {
+            if (datePopoverHideTimer) {
+                clearTimeout(datePopoverHideTimer);
+                datePopoverHideTimer = null;
+            }
+        });
+        pop.addEventListener('mouseleave', scheduleHideDatePopover);
+        pop.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-date-action]');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (btn.dataset.dateAction === 'custom') {
+                openDateActionPicker();
+            } else {
+                applyDatePopoverAction(btn.dataset.dateAction);
+            }
+        });
+
+        const picker = DOM['date-action-picker'] || document.getElementById('date-action-picker');
+        if (picker) {
+            picker.addEventListener('change', () => {
+                if (!datePopoverState || !picker.value) return;
+                applyDatePopoverAction('custom', picker.value);
+            });
+        }
+
+        ['inp-due', 'inp-t', 'inp-done-date'].forEach(id => {
+            const el = DOM[id];
+            if (!el) return;
+            el.addEventListener('change', updateDateFieldColors);
+            el.addEventListener('input', updateDateFieldColors);
+        });
+
+        document.addEventListener('mouseover', (e) => {
+            if (!e.target.closest) return;
+            const el = e.target.closest('.hl-date');
+            if (el) showDatePopoverForSpan(el);
+        });
+        document.addEventListener('mouseout', (e) => {
+            if (!e.target.closest) return;
+            const el = e.target.closest('.hl-date');
+            if (!el) return;
+            if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+            scheduleHideDatePopover();
+        });
+
+        // Tap/click support (useful on touch devices and in the project view)
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest) return;
+            const el = e.target.closest('.hl-date');
+            if (el) {
+                showDatePopoverForSpan(el);
+            } else if (!e.target.closest('.date-action-popover') && !e.target.closest('#inp-sub, #inp-desc')) {
+                hideDatePopover();
+            }
+        });
+
+        ['inp-sub', 'inp-desc'].forEach(id => {
+            const el = DOM[id];
+            if (!el) return;
+            const update = () => updateDatePopoverForTextarea(el);
+            el.addEventListener('click', update);
+            el.addEventListener('keyup', update);
+            el.addEventListener('input', update);
+            el.addEventListener('select', update);
+            el.addEventListener('blur', () => {
+                if (datePopoverState && datePopoverState.mode === 'textarea' && datePopoverState.el === el) {
+                    scheduleHideDatePopover();
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            if (datePopoverState && datePopoverState.mode === 'render') hideDatePopover();
+        }, true);
+        window.addEventListener('resize', () => {
+            if (datePopoverState && datePopoverState.mode === 'render') hideDatePopover();
+        });
+    }
+
     // === Input Resizing ===
     const calculateOptimalLines = (content, minLines, baseCharsPerLine) => {
         if (!content) return minLines;
@@ -2165,6 +2728,7 @@ const App = (function() {
 
         el.style.height = (newLines * lineHeight) + 'px';
         el.focus();
+        syncHighlightEditor(el, false);
     }
 
     function resizeDescInput(action) {
@@ -2179,12 +2743,13 @@ const App = (function() {
 
         el.style.height = (newLines * lineHeight) + 'px';
         el.focus();
+        syncHighlightEditor(el, false);
     }
 
     // === Text Insertion ===
     function insertDateToDesc() {
         const now = new Date();
-        const str = `${now.toISOString().split('T')[0]} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const str = `${todayStr(now)} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
         insertTextAtCursor(DOM['inp-desc'], `[${str}] `);
     }
 
@@ -2207,6 +2772,7 @@ const App = (function() {
             el.value += text;
         }
         el.focus();
+        syncHighlightEditor(el);
     }
 
     function renumberNumberedItems() {
@@ -2233,6 +2799,7 @@ const App = (function() {
         }
         el.value = result.join('\n');
         el.focus();
+        syncHighlightEditor(el);
     }
 
     // === Recurrence Handling ===
@@ -2431,6 +2998,8 @@ const App = (function() {
         initDefaultPriSelect();
         initSortMenuUI();
         initEventDelegation();
+        initDatePopover();
+        initHighlightEditors();
         await loadConfig();
         await loadData();
 
@@ -2449,7 +3018,7 @@ const App = (function() {
         // UI
         applyTheme, applyMainWidth, applyOpacity, applyDoneOpacity, toggleSettingsModal, closeEditModal,
         // Task operations
-        openEditModal, saveTask, saveTaskAndKeepOpen, deleteTask, deleteTaskFromEdit, completeTask, uncompleteTask,
+        openEditModal, saveTask, saveTaskAndKeepOpen, saveTaskAndComplete, deleteTask, deleteTaskFromEdit, completeTask, uncompleteTask,
         celebrateCompletion, dismissCelebration,
         // Filters
         toggleDoneSection, clearFilter, appendFilter, toggleShowHidden, toggleTodayFilter,
