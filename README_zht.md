@@ -229,5 +229,5 @@ HajimiTodotxt/
 
 ---
 
-**授權條款：** [Blue Oak Model 授權 1.0.0](https://blueoakcouncil.org/license/1.0.0)
+**授權條款：** [Apache License, Version 2.0]([https://blueoakcouncil.org/license/1.0.0](https://www.apache.org/licenses/LICENSE-2.0))
 **最後更新：** 2026-08-10
