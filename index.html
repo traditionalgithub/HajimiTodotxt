@@ -164,8 +164,7 @@
         .hl-project-segment { color: var(--project-color); font-weight: bold; cursor: pointer; }
         .hl-project-segment:hover { text-decoration: underline; }
         .hl-context { color: var(--context-color); font-weight: bold; cursor: pointer; }
-        .hl-date { font-weight: 600; padding: 0 1px; border-radius: 3px; border-bottom: 1px dotted currentColor; cursor: pointer; }
-        .hl-date:hover { background: var(--tag-bg); }
+        .hl-date { font-weight: 600; padding: 0 1px; border-radius: 3px; border-bottom: 1px dotted currentColor; }
         .hl-date-future { color: var(--success); }
         .hl-date-today { color: var(--accent); }
         .hl-date-past { color: var(--danger); }
@@ -196,6 +195,9 @@
         .form-group { flex-grow: 1; }
         .form-group.flex-2 { flex: 2; }
         .form-group.flex-1 { flex: 1; }
+        .form-group.pri-group { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+        .form-group.pri-group label { white-space: nowrap; }
+        .form-group.pri-group select { width: 52px; }
         input, select, textarea { width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--border); color: var(--text-color); padding: 8px; border-radius: 6px; box-sizing: border-box; font-family: var(--font-mono); }
         input[type="date"].date-field-future { color: var(--success); border-color: var(--success); font-weight: 600; }
         input[type="date"].date-field-today { color: var(--accent); border-color: var(--accent); font-weight: 600; }
@@ -215,6 +217,9 @@
         .highlight-backdrop .hl-date-future { color: var(--success); }
         .highlight-backdrop .hl-date-today { color: var(--accent); }
         .highlight-backdrop .hl-date-past { color: var(--danger); }
+        /* Color-only spans: no font-weight change, so the backdrop stays aligned with the transparent textarea. */
+        .highlight-backdrop .hl-project-tag { color: var(--project-color); }
+        .highlight-backdrop .hl-context-tag { color: var(--context-color); }
         textarea { scrollbar-width: thin; scrollbar-color: var(--accent) var(--border); }
         textarea::-webkit-scrollbar { width: 16px; }
         textarea::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; border: 2px solid var(--card-bg); }
@@ -224,6 +229,7 @@
         label.text-gray { color: gray; }
         .form-actions { text-align: right; margin-top: 10px; }
         .btn-group { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+        .btn-group-divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
 
         /* === Settings === */
         .settings-row { display: flex; justify-content: space-between; align-items: center; }
@@ -357,18 +363,15 @@
                 <button class="small-btn" onclick="App.resizeTitleInput('large')" id="btn-title-large">▲</button>
                 <button class="small-btn" onclick="App.resizeTitleInput('medium')" id="btn-title-medium">↺</button>
                 <button class="small-btn" onclick="App.resizeTitleInput('small')" id="btn-title-small">▼</button>
-            </div>
-
-            <div class="form-row btn-group">
-                <div class="form-group flex-1">
+                <span class="btn-group-divider"></span>
+                <div class="form-group pri-group">
                     <label class="text-gray" id="label-priority">優先級</label>
                     <select id="inp-pri"><option value="">-</option></select>
                 </div>
-                <div style="align-self: flex-end;">
-                    <button class="icon-btn" onclick="App.openContextMenu(event, 'inp-sub')" id="btn-insert-context-modal" style="height:38px; width:38px;" title="插入上下文 (@context)">@</button>
-                    <button class="icon-btn" onclick="App.openProjectMenu(event, 'inp-sub')" id="btn-insert-project-modal" style="height:38px; width:38px; position:relative;" title="插入項目 (+project)">+</button>
-                    <button class="icon-btn" onclick="App.toggleTodayTaskInModal()" id="btn-today-task-modal" style="height:38px; width:38px;" title="添加/取消今日任務">☀️</button>
-                </div>
+                <span class="btn-group-divider"></span>
+                <button class="icon-btn" onclick="App.openContextMenu(event, 'inp-sub')" id="btn-insert-context-modal" title="插入上下文 (@context)">@</button>
+                <button class="icon-btn" onclick="App.openProjectMenu(event, 'inp-sub')" id="btn-insert-project-modal" title="插入項目 (+project)">+</button>
+                <button class="icon-btn" onclick="App.toggleTodayTaskInModal()" id="btn-today-task-modal" title="添加/取消今日任務">☀️</button>
             </div>
 
             <div class="form-row">
@@ -658,22 +661,11 @@ const App = (function() {
         return info.bracketed ? `[${value}]` : value;
     }
 
-    function replaceNthDateToken(text, nth, mode, customDate) {
-        if (typeof text !== 'string') return null;
-        const re = dateTokenRegex();
-        let i = 0, m;
-        while ((m = re.exec(text)) !== null) {
-            if (i++ !== nth) continue;
-            return text.slice(0, m.index) + formatDateReplacement(m[0], mode, customDate) + text.slice(re.lastIndex);
-        }
-        return null;
-    }
-
-    function buildDateSpan(raw, meta, nth) {
+    function buildDateSpan(raw) {
         const info = parseDateToken(raw);
         if (!info) return escapeHtml(raw);
         const cls = dateTokenClass(info);
-        return `<span class="hl-date hl-date-${cls}" data-date-target="${meta.index}" data-date-done="${meta.isDone ? 1 : 0}" data-date-field="${meta.field}" data-date-nth="${nth}">${escapeHtml(raw)}</span>`;
+        return `<span class="hl-date hl-date-${cls}">${escapeHtml(raw)}</span>`;
     }
 
     function renderSubjectSegment(segment) {
@@ -690,26 +682,26 @@ const App = (function() {
             .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context" data-tag="$2">$2</span>');
     }
 
-    function renderSubjectHtml(rawText, meta) {
+    function renderSubjectHtml(rawText) {
         const text = (rawText || '').replace(/@☀️\.\d{8}\s*/g, '');
         const re = dateTokenRegex();
-        let html = '', last = 0, nth = 0, m;
+        let html = '', last = 0, m;
         while ((m = re.exec(text)) !== null) {
             html += renderSubjectSegment(text.slice(last, m.index));
-            html += buildDateSpan(m[0], meta, nth++);
+            html += buildDateSpan(m[0]);
             last = re.lastIndex;
         }
         html += renderSubjectSegment(text.slice(last));
         return html;
     }
 
-    function renderDescHtml(rawText, meta) {
+    function renderDescHtml(rawText) {
         const text = rawText || '';
         const re = dateTokenRegex();
-        let html = '', last = 0, nth = 0, m;
+        let html = '', last = 0, m;
         while ((m = re.exec(text)) !== null) {
             html += escapeHtml(text.slice(last, m.index));
-            html += buildDateSpan(m[0], meta, nth++);
+            html += buildDateSpan(m[0]);
             last = re.lastIndex;
         }
         html += escapeHtml(text.slice(last));
@@ -721,12 +713,26 @@ const App = (function() {
     // shows the same text with colored date tokens while the textarea keeps the
     // real value and caret. The textarea text is transparent only after the
     // backdrop is ready, so a failure never hides the user's input.
+
+    // Color-only version of renderSubjectSegment for the editor backdrop. No bold,
+    // so the backdrop stays pixel-aligned with the transparent textarea above it.
+    function renderHighlightSegment(segment) {
+        return escapeHtml(segment)
+            .replace(/(^|\s)(\+\S+)/g, (_m, space, tag) => {
+                const parts = tag.slice(1).split('.');
+                return space + parts.map((seg, i) =>
+                    `<span class="hl-project-tag">${i === 0 ? '+' : ''}${escapeHtml(seg)}</span>`
+                ).join('.');
+            })
+            .replace(/(^|\s)(@\S+)/g, '$1<span class="hl-context-tag">$2</span>');
+    }
+
     function buildDateHighlightHtml(rawText) {
         const text = rawText || '';
         const re = dateTokenRegex();
         let html = '', last = 0, m;
         while ((m = re.exec(text)) !== null) {
-            html += escapeHtml(text.slice(last, m.index));
+            html += renderHighlightSegment(text.slice(last, m.index));
             const info = parseDateToken(m[0]);
             if (info) {
                 html += `<span class="hl-date-${dateTokenClass(info)}">${escapeHtml(m[0])}</span>`;
@@ -735,7 +741,7 @@ const App = (function() {
             }
             last = re.lastIndex;
         }
-        html += escapeHtml(text.slice(last));
+        html += renderHighlightSegment(text.slice(last));
         // Keep the empty last line when the value ends with a newline.
         if (text.endsWith('\n')) html += '\u200b';
         return html;
@@ -1273,7 +1279,7 @@ const App = (function() {
         div.dataset.taskIndex = index;
 
         // Process subject text (highlight projects/contexts and bracketed dates)
-        const niceSub = renderSubjectHtml(t.sub, { index, isDone, field: 'sub' });
+        const niceSub = renderSubjectHtml(t.sub);
 
         // Today task icon
         let todayIcon = '';
@@ -1319,7 +1325,7 @@ const App = (function() {
             ${t.desc ? `
                 <div class="task-desc-container">
                     <div class="desc-toggle" data-index="${index}" style="display:none">${getLang('expand', '展開...')}</div>
-                    <div class="task-desc-content" id="desc-${index}">${renderDescHtml(t.desc, { index, isDone, field: 'desc' })}</div>
+                    <div class="task-desc-content" id="desc-${index}">${renderDescHtml(t.desc)}</div>
                 </div>` : ''}`;
 
         return div;
@@ -1476,7 +1482,7 @@ const App = (function() {
 
     function buildProjectViewItem(t, index, isDone) {
         const descId = pvDescCounter++;
-        const niceSub = renderSubjectHtml(t.sub, { index, isDone, field: 'sub' });
+        const niceSub = renderSubjectHtml(t.sub);
         let todayIcon = '';
         const todayMatch = t.sub.match(/@☀️\.(\d{8})/);
         if (todayMatch) {
@@ -1501,7 +1507,7 @@ const App = (function() {
         if (t.desc) {
             html += `<div class="task-desc-container" style="margin-top:4px;">
                 <div class="pv-desc-toggle" data-pv-desc-id="${descId}" onclick="App.toggleProjectViewDesc(${descId})" style="display:none">${getLang('expand', '展開...')}</div>
-                <div class="task-desc-content" id="pv-desc-${descId}">${renderDescHtml(t.desc, { index, isDone, field: 'desc' })}</div>
+                <div class="task-desc-content" id="pv-desc-${descId}">${renderDescHtml(t.desc)}</div>
             </div>`;
         }
         html += `</div>
@@ -1625,11 +1631,8 @@ const App = (function() {
                 const taskIndex = parseInt(taskItem.dataset.taskIndex);
                 const isDone = taskItem.classList.contains('done-item');
 
-                // Date token: the date popover handles it; don't trigger the title filter
-                if (e.target.closest('.hl-date')) {
-                    showDatePopoverForSpan(e.target.closest('.hl-date'));
-                    return;
-                }
+                // Dates in the list are display-only; editing happens in the edit modal.
+                // Clicking a date falls through to the plain title-filter behavior.
 
                 // Checkbox
                 if (e.target.matches('input[type="checkbox"][data-action]')) {
@@ -2284,6 +2287,10 @@ const App = (function() {
             tag = '+' + tag;
         }
         inp.value = (inp.value + ' ' + tag).trim();
+        // The highlight editor keeps its textarea text transparent, so a
+        // programmatic value change must redraw the backdrop too — otherwise
+        // the newly inserted tag/project looks completely invisible.
+        syncHighlightEditor(inp);
         if (targetId === 'filter-input') render();
         DOM['tag-menu'].classList.remove('show');
     }
@@ -2448,30 +2455,6 @@ const App = (function() {
         pop.style.top = `${y}px`;
     }
 
-    function showDatePopoverForSpan(el) {
-        if (!el) return;
-        const index = parseInt(el.dataset.dateTarget, 10);
-        const nth = parseInt(el.dataset.dateNth, 10);
-        if (isNaN(index) || isNaN(nth)) return;
-        if (datePopoverHideTimer) {
-            clearTimeout(datePopoverHideTimer);
-            datePopoverHideTimer = null;
-        }
-        resetDatePopoverCustomMode();
-        datePopoverState = {
-            mode: 'render',
-            raw: el.textContent,
-            meta: {
-                index,
-                isDone: el.dataset.dateDone === '1',
-                field: el.dataset.dateField,
-                nth
-            }
-        };
-        const r = el.getBoundingClientRect();
-        showDatePopoverAt(r.left, r.top, r.height);
-    }
-
     function hideDatePopover() {
         const pop = DOM['date-action-popover'] || document.getElementById('date-action-popover');
         if (pop) pop.classList.remove('show');
@@ -2567,48 +2550,21 @@ const App = (function() {
         showDatePopoverAt(caret.left, caret.top, caret.height);
     }
 
-    function refreshAfterDateEdit() {
-        render();
-        const pv = DOM['project-view-modal'];
-        if (pv && pv.classList.contains('show')) {
-            const box = pv.querySelector('.modal-box');
-            const top = box ? box.scrollTop : 0;
-            openProjectView();
-            if (box) box.scrollTop = top;
-        }
-    }
-
+    // Date edits are only available from the edit modal textareas (caret mode).
     function applyDatePopoverAction(action, customDate) {
         if (!datePopoverState) return;
-
-        if (datePopoverState.mode === 'render') {
-            const meta = datePopoverState.meta;
-            const list = meta.isDone ? doneTasks : tasks;
-            const task = list[meta.index];
-            if (!task) {
-                hideDatePopover();
-                return;
-            }
-            const updated = replaceNthDateToken(task[meta.field] || '', meta.nth, action, customDate);
-            hideDatePopover();
-            if (updated === null) return;
-            task[meta.field] = updated;
-            sync();
-            refreshAfterDateEdit();
-        } else if (datePopoverState.mode === 'textarea') {
-            const { el, start, end, raw } = datePopoverState;
-            const replacement = formatDateReplacement(raw, action, customDate);
-            hideDatePopover();
-            if (!el || replacement === raw) return;
-            el.value = el.value.slice(0, start) + replacement + el.value.slice(end);
-            const caret = start + replacement.length;
-            suppressTextareaPopover = true;
-            el.focus();
-            el.setSelectionRange(caret, caret);
-            syncHighlightEditor(el);
-            hideDatePopover();
-            setTimeout(() => { suppressTextareaPopover = false; }, 0);
-        }
+        const { el, start, end, raw } = datePopoverState;
+        const replacement = formatDateReplacement(raw, action, customDate);
+        hideDatePopover();
+        if (!el || replacement === raw) return;
+        el.value = el.value.slice(0, start) + replacement + el.value.slice(end);
+        const caret = start + replacement.length;
+        suppressTextareaPopover = true;
+        el.focus();
+        el.setSelectionRange(caret, caret);
+        syncHighlightEditor(el);
+        hideDatePopover();
+        setTimeout(() => { suppressTextareaPopover = false; }, 0);
     }
 
     function initDatePopover() {
@@ -2653,26 +2609,11 @@ const App = (function() {
             el.addEventListener('input', updateDateFieldColors);
         });
 
-        document.addEventListener('mouseover', (e) => {
-            if (!e.target.closest) return;
-            const el = e.target.closest('.hl-date');
-            if (el) showDatePopoverForSpan(el);
-        });
-        document.addEventListener('mouseout', (e) => {
-            if (!e.target.closest) return;
-            const el = e.target.closest('.hl-date');
-            if (!el) return;
-            if (e.relatedTarget && el.contains(e.relatedTarget)) return;
-            scheduleHideDatePopover();
-        });
-
-        // Tap/click support (useful on touch devices and in the project view)
+        // The date popover is only for the edit modal textareas (caret mode).
+        // Clicking anywhere else closes it.
         document.addEventListener('click', (e) => {
             if (!e.target.closest) return;
-            const el = e.target.closest('.hl-date');
-            if (el) {
-                showDatePopoverForSpan(el);
-            } else if (!e.target.closest('.date-action-popover') && !e.target.closest('#inp-sub, #inp-desc')) {
+            if (!e.target.closest('.date-action-popover') && !e.target.closest('#inp-sub, #inp-desc')) {
                 hideDatePopover();
             }
         });
@@ -2692,12 +2633,8 @@ const App = (function() {
             });
         });
 
-        window.addEventListener('scroll', () => {
-            if (datePopoverState && datePopoverState.mode === 'render') hideDatePopover();
-        }, true);
-        window.addEventListener('resize', () => {
-            if (datePopoverState && datePopoverState.mode === 'render') hideDatePopover();
-        });
+        window.addEventListener('scroll', hideDatePopover, true);
+        window.addEventListener('resize', hideDatePopover);
     }
 
     // === Input Resizing ===
